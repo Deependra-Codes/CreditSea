@@ -228,9 +228,9 @@ export function EligibilityForm({
       )}
 
       {bre && !bre.passed && (
-        <p role="status" className="text-sm text-ink-2">
+        <output className="text-sm text-ink-2">
           Your details are saved. Correct the rules above and check again — nothing is lost.
-        </p>
+        </output>
       )}
 
       <Button type="submit" disabled={pending} className="self-start">
