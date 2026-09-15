@@ -187,11 +187,11 @@ p {
 }
 
 @utility drift-slow {
-  animation: drift 22s var(--ease-standard) infinite alternate;
+  animation: drift 23s var(--ease-standard) infinite alternate;
 }
 
 @utility drift-slower {
-  animation: drift 30s var(--ease-standard) infinite alternate-reverse;
+  animation: drift 31s var(--ease-standard) infinite alternate-reverse;
 }
 
 @keyframes drift {
@@ -203,70 +203,7 @@ p {
   }
 }
 
-/* ─── The loan journey ─────────────────────────────────────────────────────
-   A token travels the pipeline and each stop lights as it arrives, on an
-   8s loop. It is the product's own lifecycle, not decoration. */
-
-@utility journey-token {
-  animation: travel 8s var(--ease-standard) infinite;
-}
-
-@keyframes travel {
-  0%,
-  4% {
-    left: 0%;
-    opacity: 0;
-  }
-  8% {
-    left: 0%;
-    opacity: 1;
-  }
-  28% {
-    left: 33.333%;
-  }
-  52% {
-    left: 66.666%;
-  }
-  76%,
-  92% {
-    left: 100%;
-    opacity: 1;
-  }
-  100% {
-    left: 100%;
-    opacity: 0;
-  }
-}
-
-@keyframes arrive {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 transparent;
-  }
-  40% {
-    transform: scale(1.5);
-    box-shadow: 0 0 0 6px var(--color-accent-sub);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 transparent;
-  }
-}
-
-@keyframes fill-track {
-  0%,
-  6% {
-    transform: scaleX(0);
-  }
-  76%,
-  100% {
-    transform: scaleX(1);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .journey-token,
   .drift-slow,
   .drift-slower {
     animation: none !important;
@@ -275,7 +212,9 @@ p {
 
 /* The mesh breathes on a long cycle — slow enough to notice only on a second look. */
 @utility mesh-drift {
-  animation: mesh-drift 26s var(--ease-standard) infinite alternate;
+  /* Prime-ish and mutually coprime with the other loops, so the combined
+     cycle is long enough that the eye never catches the repeat. */
+  animation: mesh-drift 29s var(--ease-standard) infinite alternate;
 }
 
 @keyframes mesh-drift {

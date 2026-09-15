@@ -1,6 +1,6 @@
 "use client";
 
-import { LoanJourney } from "@/components/loan-journey";
+import { LiveLoanCard } from "@/components/live-loan-card";
 import { MeshBackdrop } from "@/components/mesh-backdrop";
 import { BadgeIndianRupee, CalendarRange, Percent } from "lucide-react";
 import { useState } from "react";
@@ -56,28 +56,24 @@ export function AuthScreen({ initialMode }: { initialMode: AuthMode }) {
       <aside
         className={[
           "relative hidden overflow-hidden bg-canvas",
-          "lg:flex lg:flex-col lg:justify-between lg:gap-8 lg:p-12",
+          "lg:flex lg:flex-col lg:justify-center lg:gap-7 lg:p-12 lg:pb-10",
           "transition-transform duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
           registering ? "lg:translate-x-full" : "lg:translate-x-0",
         ].join(" ")}
       >
         <MeshBackdrop />
 
-        <div className="relative flex flex-col gap-3">
+        <div className="relative flex flex-col gap-2.5">
           <span className="text-xs font-bold uppercase tracking-[0.12em] text-accent">
             Lending Portal
           </span>
-          <h2 className="max-w-md text-4xl font-extrabold leading-[1.08] tracking-tight">
+          <h2 className="max-w-md text-[2.6rem] font-extrabold leading-[1.05] tracking-[-0.03em]">
             Four steps to a loan, and four hands that move it.
           </h2>
-          <p className="max-w-sm text-sm text-ink-2">
-            Borrowers apply in one sitting. Sanction, disbursement and collection each work the
-            stage that is theirs.
-          </p>
         </div>
 
         <div className="relative">
-          <LoanJourney />
+          <LiveLoanCard />
         </div>
 
         <dl className="relative grid grid-cols-3 gap-3">
