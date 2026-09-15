@@ -54,9 +54,12 @@ export function EligibilityForm({
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // An edit invalidates the last verdict, and any error from it, until re-checked.
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) => {
     setDraft((previous) => ({ ...previous, [key]: value }));
-    setBre(null); // an edit invalidates the last verdict until re-checked
+    setBre(null);
+    setFormError(null);
+    setFieldErrors({});
   };
 
   // The same module the API treats as authority. A client check is a
@@ -158,7 +161,7 @@ export function EligibilityForm({
         <Field
           label="PAN"
           htmlFor="p-pan"
-          hint="Ten characters, e.g. ABCDE1234F"
+          hint="Five letters, four digits, one letter"
           error={fieldErrors.pan}
         >
           <input

@@ -23,23 +23,37 @@ export async function saveProfile(userId: string, input: ProfileInput) {
     employmentMode: input.employmentMode,
   });
 
-  const profile = await BorrowerProfile.findOneAndUpdate(
-    { userId },
-    {
-      $set: {
-        userId,
-        fullName: input.fullName,
-        pan: input.pan,
-        dateOfBirth: input.dateOfBirth,
-        monthlySalaryPaise: input.monthlySalary,
-        employmentMode: input.employmentMode,
-        bre: { ...bre, evaluatedAt: new Date() },
+  try {
+    const profile = await BorrowerProfile.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          userId,
+          fullName: input.fullName,
+          pan: input.pan,
+          dateOfBirth: input.dateOfBirth,
+          monthlySalaryPaise: input.monthlySalary,
+          employmentMode: input.employmentMode,
+          bre: { ...bre, evaluatedAt: new Date() },
+        },
       },
-    },
-    { upsert: true, new: true, setDefaultsOnInsert: true },
-  );
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
 
-  return { profile, bre };
+    return { profile, bre };
+  } catch (err) {
+    // One PAN belongs to one person, so the unique index is right — but the
+    // generic duplicate-key message names no field, which leaves the applicant
+    // with no idea what to change.
+    if ((err as { code?: number }).code === 11000) {
+      throw new HttpError(
+        409,
+        "PAN_ALREADY_REGISTERED",
+        "This PAN is already registered to another account.",
+      );
+    }
+    throw err;
+  }
 }
 
 export async function storeSalarySlip(
