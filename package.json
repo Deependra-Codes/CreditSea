@@ -1,0 +1,20 @@
+{
+  "name": "lms",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20.9.0" },
+  "scripts": {
+    "typecheck": "pnpm -r exec tsc --noEmit",
+    "test": "pnpm -r test",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "boundaries": "depcruise packages apps --config dependency-cruiser.cjs",
+    "dev": "pnpm -r --parallel dev",
+    "seed": "pnpm --filter @lms/api seed"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "dependency-cruiser": "^16.10.4",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,9 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+
+# pnpm 12 blocks postinstall scripts unless listed here. Biome's postinstall
+# resolves its platform-native binary, so it must be allowed or `biome` fails
+# to run. Everything not listed stays blocked by default.
+allowBuilds:
+  "@biomejs/biome": true
