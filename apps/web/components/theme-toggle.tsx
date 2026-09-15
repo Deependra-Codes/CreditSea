@@ -11,26 +11,30 @@ const stamp = (theme: Theme) => document.documentElement.setAttribute("data-them
 
 /** Far enough to reach the corner furthest from the click, or the circle stops short. */
 const radiusToFurthestCorner = (x: number, y: number) =>
-  Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  // 6% past the corner, so the circle has fully cleared before the animation
+  // ends rather than terminating at the exact moment it covers.
+  Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.06;
 
 /**
- * One switch, not three choices. The OS preference still decides what a first
- * visit looks like — it is simply not a third button, because "system" is the
- * state you are already in before you touch anything.
+ * One switch, not three choices. Light is the product's default and the OS
+ * preference is not consulted — this is an app with a look, not a document that
+ * should adopt the reader's.
  *
  * The new theme is wiped in as a circle growing from the switch. Entirely
  * progressive: without View Transitions, or under reduced motion, it just
  * changes.
  */
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
 
+  // Light unless someone has chosen otherwise. The OS preference is not
+  // consulted: this product has a look, and the switch is how it changes.
   useEffect(() => {
     const stored = localStorage.getItem(KEY) as Theme | null;
-    const resolved =
-      stored ?? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    setTheme(resolved);
-    if (stored) stamp(stored);
+    if (stored === "dark" || stored === "light") {
+      setTheme(stored);
+      stamp(stored);
+    }
   }, []);
 
   function toggle(event: MouseEvent<HTMLButtonElement>) {
@@ -71,8 +75,10 @@ export function ThemeToggle() {
           ],
         },
         {
-          duration: 520,
-          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+          duration: 620,
+          // easeOutQuint: essentially arrived by the halfway point, so the tail
+          // is imperceptible and there is no hard stop to notice.
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
           pseudoElement: "::view-transition-new(root)",
         },
       );

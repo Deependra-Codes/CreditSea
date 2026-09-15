@@ -43,13 +43,26 @@ const COPY = {
  * the URL is corrected in place when the mode changes.
  */
 export function AuthScreen({ initialMode }: { initialMode: AuthMode }) {
+  // Two pieces of state on purpose. `registering` drives the slide and flips
+  // immediately, so the panels start moving on the click. `mode` drives the
+  // copy and flips mid-way, while the text is invisible — keying the content on
+  // mode instead tore the old subtree out at once, leaving the form half blank
+  // for a beat, which is the jump.
+  const [registering, setRegistering] = useState(initialMode === "register");
   const [mode, setMode] = useState<AuthMode>(initialMode);
+  const [swapping, setSwapping] = useState(false);
   const copy = COPY[mode];
-  const registering = mode === "register";
 
   const switchTo = (next: AuthMode) => {
-    setMode(next);
-    window.history.replaceState(null, "", COPY[next].path);
+    if (swapping) return;
+    setRegistering(next === "register");
+    setSwapping(true);
+
+    window.setTimeout(() => {
+      setMode(next);
+      window.history.replaceState(null, "", COPY[next].path);
+      setSwapping(false);
+    }, 220);
   };
 
   return (
@@ -106,9 +119,11 @@ export function AuthScreen({ initialMode }: { initialMode: AuthMode }) {
       >
         {/* keyed on mode, so the contents cross-fade while the halves slide */}
         <div
-          key={mode}
-          className="enter flex w-full max-w-sm flex-col gap-6"
-          style={{ animationDelay: "220ms" }}
+          className={[
+            "flex w-full max-w-sm flex-col gap-6",
+            "transition-opacity duration-200 ease-(--ease-standard)",
+            swapping ? "opacity-0" : "opacity-100",
+          ].join(" ")}
         >
           <div className="flex flex-col gap-1.5">
             <Logo className="mb-1 lg:hidden" />
