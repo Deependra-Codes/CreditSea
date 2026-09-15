@@ -1,12 +1,7 @@
 import { BRE_RULES, type BreCode } from "@lms/domain";
+import { Check, X } from "lucide-react";
 
 export type RuleState = "pending" | "pass" | "fail";
-
-const GLYPH: Record<RuleState, { mark: string; box: string; text: string }> = {
-  pending: { mark: "", box: "border-2 border-line-2 bg-canvas", text: "text-ink-3" },
-  pass: { mark: "✓", box: "bg-good text-white", text: "text-ink-2" },
-  fail: { mark: "✕", box: "bg-critical text-white", text: "text-ink" },
-};
 
 /**
  * Iterates BRE_RULES rather than listing four rows, so a fifth rule added to the
@@ -23,30 +18,45 @@ export function EligibilityChecklist({
     <ul className="flex flex-col gap-1.5" aria-label="Eligibility rules">
       {BRE_RULES.map((rule) => {
         const state = states[rule.code];
-        const glyph = GLYPH[state];
 
         return (
           <li
             key={rule.code}
             className={[
-              "grid grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-3 rounded-ctrl border bg-canvas px-3 py-2.5",
-              state === "fail" ? "border-critical/30" : "border-line",
+              "grid grid-cols-[20px_minmax(0,1fr)_auto] items-center gap-3 rounded-ctrl px-3 py-2.5",
+              "transition-[box-shadow,background-color] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+              state === "fail"
+                ? "bg-critical/5 ring-1 ring-critical/30"
+                : "bg-canvas ring-1 ring-line-soft",
             ].join(" ")}
           >
             <span
-              className={`grid size-[18px] place-items-center rounded-full text-[11px] font-bold ${glyph.box}`}
-              aria-hidden="true"
+              className={[
+                "grid size-5 place-items-center rounded-full text-canvas transition-colors duration-200",
+                state === "pass" ? "bg-good" : "",
+                state === "fail" ? "bg-critical" : "",
+                state === "pending" ? "bg-transparent ring-2 ring-line ring-inset" : "",
+              ].join(" ")}
+              aria-hidden
             >
-              {glyph.mark}
+              {state === "pass" && <Check className="size-3 stroke-[3]" />}
+              {state === "fail" && <X className="size-3 stroke-[3]" />}
             </span>
-            <span className={`text-sm ${glyph.text}`}>{rule.message}</span>
+
+            <span className={`text-sm ${state === "pending" ? "text-ink-3" : ""}`}>
+              {rule.message}
+            </span>
+
             {detail[rule.code] && (
               <span
-                className={`font-mono text-xs ${state === "fail" ? "font-medium text-critical" : "text-ink-3"}`}
+                className={`font-mono text-xs ${
+                  state === "fail" ? "font-medium text-critical" : "text-ink-3"
+                }`}
               >
                 {detail[rule.code]}
               </span>
             )}
+
             <span className="sr-only">
               {state === "pass" ? "met" : state === "fail" ? "not met" : "not yet checked"}
             </span>

@@ -45,12 +45,15 @@ export async function StatusPage() {
   return (
     <PortalShell>
       <div className="flex flex-col gap-7">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold tracking-tight">Your loan</h1>
+        <div className="enter flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-3xl font-extrabold tracking-tight">Your loan</h1>
           <StatusPill status={loan.status} />
         </div>
 
-        <div className="rounded-card border border-line bg-canvas p-5 shadow-lift-1">
+        <div
+          className="enter rounded-card bg-canvas p-5 ring-1 ring-line"
+          style={{ animationDelay: "60ms" }}
+        >
           <LifecycleRail status={loan.status} />
         </div>
 
@@ -63,7 +66,10 @@ export async function StatusPage() {
           </div>
         )}
 
-        <div className="rounded-card border border-line bg-canvas px-5 py-1 shadow-lift-1">
+        <div
+          className="enter rounded-card bg-canvas px-5 py-1 ring-1 ring-line"
+          style={{ animationDelay: "120ms" }}
+        >
           <Row label="Principal">
             <Money paise={rupeesToPaise(loan.principal)} />
           </Row>

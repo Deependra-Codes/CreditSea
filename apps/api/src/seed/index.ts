@@ -6,6 +6,7 @@ import { Payment } from "../models/payment";
 import { User } from "../models/user";
 import { hashPassword } from "../modules/auth/service";
 import { SEED_ACCOUNTS, SEED_PASSWORD } from "./accounts";
+import { seedDemoData } from "./demo";
 
 const MODELS = [User, BorrowerProfile, Loan, Payment];
 
@@ -43,6 +44,9 @@ async function seed() {
 
   console.log("\nAccounts");
   await seedAccounts();
+
+  console.log("\nDemo borrowers");
+  await seedDemoData();
 
   console.log(`\n  password for every account: ${SEED_PASSWORD}\n`);
   await disconnectDb();

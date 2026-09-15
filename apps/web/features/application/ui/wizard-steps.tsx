@@ -10,7 +10,7 @@ export function WizardSteps({ current }: { current: WizardStep }) {
 
         return (
           <li key={step.number} className="flex items-center gap-1">
-            {index > 0 && <span className="mr-1 h-px w-4 bg-line-2" aria-hidden="true" />}
+            {index > 0 && <span className="mr-1 h-px w-4 bg-line" aria-hidden="true" />}
             <span
               className={[
                 "grid size-5 shrink-0 place-items-center rounded-full text-[10px] font-bold",

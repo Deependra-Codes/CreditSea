@@ -3,9 +3,10 @@
 import { type Column, QueueShell } from "@/components/queue-shell";
 import type { LeadResponse } from "@lms/contracts";
 import type { LeadStage } from "@lms/domain";
+import { UserPlus } from "lucide-react";
 
 const STAGE: Record<LeadStage, { label: string; dot: string; tone: string }> = {
-  SIGNED_UP: { label: "Signed up", dot: "bg-line-2", tone: "text-ink-3" },
+  SIGNED_UP: { label: "Signed up", dot: "bg-line", tone: "text-ink-3" },
   DETAILS_STARTED: { label: "Details started", dot: "bg-stage-1", tone: "text-ink-2" },
   NOT_ELIGIBLE: { label: "Not eligible", dot: "bg-critical", tone: "text-critical" },
   READY_TO_APPLY: { label: "Ready to apply", dot: "bg-good", tone: "text-ink" },
@@ -57,7 +58,11 @@ export function SalesLeads({ leads }: { leads: LeadResponse[] }) {
       rows={leads}
       columns={columns}
       getRowId={(lead) => lead.id}
-      emptyMessage="No borrowers have registered yet."
+      empty={{
+        icon: UserPlus,
+        title: "No leads yet",
+        body: "Borrowers appear here the moment they create an account.",
+      }}
     />
   );
 }

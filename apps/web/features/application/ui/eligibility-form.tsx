@@ -15,6 +15,7 @@ import {
   rupeesToPaise,
 } from "@lms/domain";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { EligibilityChecklist, type RuleState } from "./eligibility-checklist";
 
 const EMPLOYMENT_LABEL: Record<EmploymentMode, string> = {
@@ -132,7 +133,10 @@ export function EligibilityForm({
       // A rejection arrives as a 200 with failures, not as a thrown error:
       // the details were saved and this screen is where they get corrected.
       setBre(result.bre);
-      if (result.bre.passed) onPassed(result.profile);
+      if (result.bre.passed) {
+        toast.success("You are eligible", { description: "Next: upload your salary slip." });
+        onPassed(result.profile);
+      }
     } catch (error) {
       if (error instanceof ApiClientError) {
         setFormError(error.message);

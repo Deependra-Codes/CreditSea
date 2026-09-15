@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 
 export const inputClass =
-  "w-full rounded-ctrl border border-line-2 bg-canvas px-3 py-2 text-sm text-ink " +
-  "shadow-[0_1px_1px_rgb(10_37_64/0.04)] " +
-  "focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent/20";
+  "w-full rounded-ctrl bg-canvas px-3 py-2 text-sm text-ink ring-1 ring-line " +
+  "transition-shadow duration-150 ease-[cubic-bezier(0.2,0.8,0.2,1)] " +
+  "focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-2 focus:ring-offset-canvas";
 
 export function Field({
   label,
@@ -22,12 +22,12 @@ export function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={htmlFor} className="text-xs font-medium text-ink-2">
+      <label htmlFor={htmlFor} className="text-xs font-semibold text-ink-2">
         {label}
       </label>
       {children}
       {error ? (
-        <p id={`${htmlFor}-error`} className="text-xs text-critical">
+        <p id={`${htmlFor}-error`} className="text-xs font-medium text-critical">
           {error}
         </p>
       ) : hint ? (

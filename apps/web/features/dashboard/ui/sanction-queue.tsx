@@ -4,8 +4,10 @@ import { Button } from "@/components/button";
 import { QueueShell } from "@/components/queue-shell";
 import { ApiClientError, api } from "@/lib/api";
 import type { LoanResponse } from "@lms/contracts";
+import { FileCheck2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { loanColumns, waitingTiles } from "./loan-columns";
 import { LoanDetail } from "./loan-detail";
 
@@ -22,6 +24,9 @@ function Decision({ loan }: { loan: LoanResponse }) {
       await api(`/api/sanction/${loan.id}/decide`, {
         method: "POST",
         body: JSON.stringify(decision === "REJECT" ? { decision, reason } : { decision }),
+      });
+      toast.success(decision === "APPROVE" ? "Loan sanctioned" : "Loan rejected", {
+        description: `${loan.applicantName} · ${loan.pan}`,
       });
       router.refresh();
     } catch (caught) {
@@ -41,7 +46,7 @@ function Decision({ loan }: { loan: LoanResponse }) {
           value={reason}
           onChange={(event) => setReason(event.target.value)}
           placeholder="Salary slip does not match the declared income"
-          className="w-full rounded-ctrl border border-line-2 bg-canvas px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent/20"
+          className="w-full rounded-ctrl bg-canvas px-3 py-2 text-sm ring-1 ring-line focus:outline-none focus:ring-1 focus:ring-accent focus:ring-offset-2 focus:ring-offset-canvas"
         />
       </div>
 
@@ -77,7 +82,11 @@ export function SanctionQueue({ loans }: { loans: LoanResponse[] }) {
       rows={loans}
       columns={loanColumns}
       getRowId={(loan) => loan.id}
-      emptyMessage="Nothing waiting. New applications land here as borrowers apply."
+      empty={{
+        icon: FileCheck2,
+        title: "Nothing waiting",
+        body: "New applications land here the moment a borrower applies. Queue is clear.",
+      }}
       renderDetail={(loan) => (
         <LoanDetail loan={loan}>
           <Decision loan={loan} />

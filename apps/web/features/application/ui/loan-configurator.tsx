@@ -13,8 +13,10 @@ import {
   quoteLoan,
   rupeesToPaise,
 } from "@lms/domain";
+import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { RepaymentBar } from "./repayment-bar";
 
 const MIN_RUPEES = paiseToRupees(MIN_PRINCIPAL_PAISE);
@@ -39,6 +41,9 @@ export function LoanConfigurator() {
       await api<{ loan: LoanResponse }>("/api/loans", {
         method: "POST",
         body: JSON.stringify({ amount, tenureDays }),
+      });
+      toast.success("Application submitted", {
+        description: "Your loan is now with the sanction team.",
       });
       router.replace("/apply/status");
       router.refresh();
@@ -98,14 +103,14 @@ export function LoanConfigurator() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-card border border-line bg-canvas p-5 shadow-lift-2">
+      <div className="flex flex-col gap-4 rounded-card bg-canvas p-5 ring-1 ring-line">
         <div className="flex flex-col gap-0.5">
           <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-3">
             Total repayment
           </span>
           <Money
             paise={quote.totalRepayablePaise}
-            className="text-[2.1rem] font-bold leading-tight tracking-tight"
+            className="text-[clamp(2.4rem,7vw,3.2rem)] font-extrabold leading-[1.02] tracking-[-0.04em]"
           />
         </div>
 
@@ -126,6 +131,7 @@ export function LoanConfigurator() {
 
         <Button type="button" disabled={pending} onClick={() => void apply()} className="w-full">
           {pending ? "Submitting…" : "Apply for this loan"}
+          {!pending && <ArrowRight className="size-4" aria-hidden />}
         </Button>
       </div>
     </div>

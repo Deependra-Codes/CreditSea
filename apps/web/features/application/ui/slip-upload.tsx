@@ -3,7 +3,9 @@
 import { Button } from "@/components/button";
 import { ApiClientError, api } from "@/lib/api";
 import type { SalarySlipResponse } from "@lms/contracts";
+import { UploadCloud } from "lucide-react";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ACCEPT = ".pdf,.jpg,.jpeg,.png";
@@ -30,6 +32,7 @@ export function SlipUpload({ onUploaded }: { onUploaded: (slip: SalarySlipRespon
         method: "POST",
         body,
       });
+      toast.success("Salary slip uploaded", { description: result.salarySlip.originalName });
       onUploaded(result.salarySlip);
     } catch (caught) {
       // The client's accept and size check are conveniences; the server checks
@@ -43,9 +46,12 @@ export function SlipUpload({ onUploaded }: { onUploaded: (slip: SalarySlipRespon
     <div className="flex flex-col gap-4">
       <label
         htmlFor="slip"
-        className="flex cursor-pointer flex-col items-center gap-2 rounded-card border border-dashed border-line-2 bg-canvas px-6 py-10 text-center hover:border-accent"
+        className="flex cursor-pointer flex-col items-center gap-2.5 rounded-card bg-canvas px-6 py-12 text-center ring-1 ring-dashed ring-line transition-colors hover:ring-accent"
       >
-        <span className="text-sm font-semibold text-ink">Choose your salary slip</span>
+        <span className="grid size-11 place-items-center rounded-full bg-accent-sub text-accent">
+          <UploadCloud className="size-5" aria-hidden />
+        </span>
+        <span className="text-sm font-bold text-ink">Choose your salary slip</span>
         <span className="text-xs text-ink-3">PDF, JPG or PNG · up to 5 MB</span>
         <input
           ref={inputRef}

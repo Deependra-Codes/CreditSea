@@ -1,4 +1,5 @@
 import type { LoanStatus } from "@lms/domain";
+import { CircleSlash } from "lucide-react";
 
 const STAGES = [
   { status: "APPLIED", label: "Applied", dot: "bg-stage-1" },
@@ -12,7 +13,8 @@ export function LifecycleRail({ status }: { status: LoanStatus }) {
   // "stuck at Applied" would misdescribe what happened.
   if (status === "REJECTED") {
     return (
-      <p className="text-sm text-critical">
+      <p className="flex items-center gap-2 text-sm font-medium text-critical">
+        <CircleSlash className="size-4 shrink-0" aria-hidden />
         This application was rejected and did not enter the lifecycle.
       </p>
     );
@@ -26,20 +28,22 @@ export function LifecycleRail({ status }: { status: LoanStatus }) {
         <li key={stage.status} className="contents">
           {index > 0 && (
             <span
-              className={`h-0.5 min-w-3 flex-auto ${index <= reached ? "bg-stage-2" : "bg-line-2"}`}
+              className={`h-0.5 min-w-3.5 flex-auto transition-colors duration-300 ${
+                index <= reached ? "bg-stage-2" : "bg-line"
+              }`}
               aria-hidden="true"
             />
           )}
-          <div className="flex w-24 shrink-0 flex-col items-center gap-1.5">
+          <div className="flex w-25 shrink-0 flex-col items-center gap-1.5">
             <span
               className={[
-                "size-3 rounded-full",
-                index <= reached ? stage.dot : "border-2 border-line-2 bg-canvas",
-                index === reached ? "ring-4 ring-accent/20" : "",
+                "size-3.5 rounded-full transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+                index <= reached ? stage.dot : "bg-transparent ring-2 ring-line ring-inset",
+                index === reached ? "ring-4 ring-accent-sub" : "",
               ].join(" ")}
             />
             <span
-              className={`text-[10px] font-semibold uppercase tracking-wider ${
+              className={`text-[10px] font-bold uppercase tracking-wider ${
                 index <= reached ? "text-ink" : "text-ink-3"
               }`}
             >

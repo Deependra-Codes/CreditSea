@@ -4,8 +4,10 @@ import { Button } from "@/components/button";
 import { QueueShell } from "@/components/queue-shell";
 import { ApiClientError, api } from "@/lib/api";
 import type { LoanResponse } from "@lms/contracts";
+import { Banknote } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { loanColumns, waitingTiles } from "./loan-columns";
 import { LoanDetail } from "./loan-detail";
 
@@ -19,6 +21,7 @@ function Release({ loan }: { loan: LoanResponse }) {
     setError(null);
     try {
       await api(`/api/disbursement/${loan.id}/release`, { method: "POST" });
+      toast.success("Funds released", { description: `${loan.applicantName} · ${loan.pan}` });
       router.refresh();
     } catch (caught) {
       setError(caught instanceof ApiClientError ? caught.message : "Could not reach the server.");
@@ -59,7 +62,11 @@ export function DisbursementQueue({ loans }: { loans: LoanResponse[] }) {
       rows={loans}
       columns={loanColumns}
       getRowId={(loan) => loan.id}
-      emptyMessage="Nothing to disburse. Loans arrive here once sanction approves them."
+      empty={{
+        icon: Banknote,
+        title: "Nothing to disburse",
+        body: "Loans arrive here once the sanction team approves them.",
+      }}
       renderDetail={(loan) => (
         <LoanDetail loan={loan}>
           <Release loan={loan} />

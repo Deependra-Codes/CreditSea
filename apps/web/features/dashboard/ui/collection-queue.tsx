@@ -7,8 +7,10 @@ import { type Column, QueueShell } from "@/components/queue-shell";
 import { ApiClientError, api, toFieldErrors } from "@/lib/api";
 import type { LoanResponse } from "@lms/contracts";
 import { rupeesToPaise } from "@lms/domain";
+import { Wallet } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { loanColumns } from "./loan-columns";
 import { LoanDetail } from "./loan-detail";
 
@@ -37,6 +39,9 @@ function PaymentForm({ loan }: { loan: LoanResponse }) {
       await api(`/api/collection/${loan.id}/payments`, {
         method: "POST",
         body: JSON.stringify({ utr, amount: entered, paidAt }),
+      });
+      toast.success(settles ? "Loan settled and closed" : "Payment recorded", {
+        description: `UTR ${utr} · ₹${entered.toLocaleString("en-IN")}`,
       });
       router.refresh();
     } catch (caught) {
@@ -139,7 +144,11 @@ export function CollectionQueue({ loans }: { loans: LoanResponse[] }) {
       rows={loans}
       columns={[...loanColumns, outstanding]}
       getRowId={(loan) => loan.id}
-      emptyMessage="No active loans. They arrive here once disbursement releases funds."
+      empty={{
+        icon: Wallet,
+        title: "No active loans",
+        body: "Loans arrive here once disbursement releases the funds.",
+      }}
       renderDetail={(loan) => (
         <LoanDetail loan={loan}>
           <PaymentForm loan={loan} />

@@ -14,15 +14,20 @@ export function AuthShell({
 }) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-4 py-12">
-      <div className="flex flex-col gap-1.5">
+      <div className="enter flex flex-col gap-1.5">
         <Link href="/" className="text-xs font-semibold uppercase tracking-[0.1em] text-accent">
           Lending Portal
         </Link>
-        <h1 className="text-3xl font-bold tracking-tight text-balance">{title}</h1>
+        <h1 className="text-4xl font-extrabold tracking-tight text-balance">{title}</h1>
         <p className="text-sm text-ink-2">{subtitle}</p>
       </div>
 
-      <div className="rounded-card border border-line bg-canvas p-6 shadow-lift-1">{children}</div>
+      <div
+        className="enter rounded-card bg-canvas p-6 ring-1 ring-line"
+        style={{ animationDelay: "60ms" }}
+      >
+        {children}
+      </div>
 
       <div className="text-sm text-ink-2">{footer}</div>
     </main>

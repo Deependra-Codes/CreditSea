@@ -19,11 +19,11 @@ const LABEL: Record<LoanStatus, string> = {
 
 /** The name is always present — status never rests on colour alone. */
 export function StatusPill({ status }: { status: LoanStatus }) {
-  const tone =
-    status === "REJECTED" ? "text-critical border-critical/40" : "text-ink-2 border-line-2";
+  const tone = status === "REJECTED" ? "text-critical ring-critical/40" : "text-ink-2 ring-line";
+
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border bg-surface px-2 py-0.5 text-[11px] font-semibold ${tone}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-bold ring-1 ${tone}`}
     >
       <span className={`size-[7px] shrink-0 rounded-full ${DOT[status]}`} />
       {LABEL[status]}

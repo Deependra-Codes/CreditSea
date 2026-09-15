@@ -38,14 +38,19 @@ export function Wizard({ initial }: { initial: ApplicationResponse }) {
 
   return (
     <div className="flex flex-col gap-7">
-      <WizardSteps current={step} />
+      <div className="enter">
+        <WizardSteps current={step} />
+      </div>
 
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight">{heading.title}</h1>
+      <div className="enter flex flex-col gap-1" style={{ animationDelay: "60ms" }}>
+        <h1 className="text-3xl font-extrabold tracking-tight">{heading.title}</h1>
         <p className="text-sm text-ink-2">{heading.blurb}</p>
       </div>
 
-      <div className="rounded-card border border-line bg-canvas p-5 shadow-lift-1 sm:p-6">
+      <div
+        className="enter rounded-card bg-canvas p-5 ring-1 ring-line sm:p-6"
+        style={{ animationDelay: "120ms" }}
+      >
         {step === 2 && (
           <EligibilityForm
             profile={application.profile}
