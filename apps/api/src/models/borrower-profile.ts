@@ -1,5 +1,6 @@
-import { EMPLOYMENT_MODES } from "@lms/domain";
-import { Schema, Types, model } from "mongoose";
+import type { ProfileResponse } from "@lms/contracts";
+import { EMPLOYMENT_MODES, type Paise, paiseToRupees } from "@lms/domain";
+import { type HydratedDocument, type InferSchemaType, Schema, Types, model } from "mongoose";
 
 const salarySlipSchema = new Schema(
   {
@@ -31,3 +32,35 @@ const borrowerProfileSchema = new Schema(
 );
 
 export const BorrowerProfile = model("BorrowerProfile", borrowerProfileSchema);
+
+export type BorrowerProfileDoc = HydratedDocument<InferSchemaType<typeof borrowerProfileSchema>>;
+
+/** `storedName` stays server-side: the file is fetched by owner, never by path. */
+export function toProfileResponse(profile: BorrowerProfileDoc): ProfileResponse {
+  const slip = profile.salarySlip;
+
+  return {
+    id: String(profile._id),
+    fullName: profile.fullName,
+    pan: profile.pan,
+    dateOfBirth: profile.dateOfBirth.toISOString(),
+    monthlySalary: paiseToRupees(profile.monthlySalaryPaise as Paise),
+    employmentMode: profile.employmentMode,
+    bre: {
+      passed: profile.bre?.passed ?? false,
+      failures: (profile.bre?.failures ?? []).map((failure) => ({
+        code: failure.code as ProfileResponse["bre"]["failures"][number]["code"],
+        message: failure.message as string,
+      })),
+      evaluatedAt: (profile.bre?.evaluatedAt ?? new Date()).toISOString(),
+    },
+    salarySlip: slip
+      ? {
+          originalName: slip.originalName,
+          mimeType: slip.mimeType,
+          sizeBytes: slip.sizeBytes,
+          uploadedAt: slip.uploadedAt.toISOString(),
+        }
+      : null,
+  };
+}

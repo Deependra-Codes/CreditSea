@@ -1,5 +1,6 @@
-import { EMPLOYMENT_MODES, LOAN_STATUSES, ROLES } from "@lms/domain";
-import { Schema, Types, model } from "mongoose";
+import type { LoanResponse, StatusEventResponse } from "@lms/contracts";
+import { EMPLOYMENT_MODES, LOAN_STATUSES, type Paise, ROLES, paiseToRupees } from "@lms/domain";
+import { type HydratedDocument, type InferSchemaType, Schema, Types, model } from "mongoose";
 
 const statusEventSchema = new Schema(
   {
@@ -13,6 +14,17 @@ const statusEventSchema = new Schema(
   { _id: false },
 );
 
+const snapshotSchema = new Schema(
+  {
+    fullName: { type: String, required: true },
+    pan: { type: String, required: true },
+    dateOfBirth: { type: Date, required: true },
+    monthlySalaryPaise: { type: Number, required: true },
+    employmentMode: { type: String, enum: EMPLOYMENT_MODES, required: true },
+  },
+  { _id: false },
+);
+
 const loanSchema = new Schema(
   {
     borrowerId: { type: Types.ObjectId, ref: "User", required: true, index: true },
@@ -22,13 +34,7 @@ const loanSchema = new Schema(
     activeBorrowerId: { type: Types.ObjectId, ref: "User" },
 
     // Frozen at apply time: a later salary edit must not move a sanctioned loan's basis.
-    snapshot: {
-      fullName: { type: String, required: true },
-      pan: { type: String, required: true },
-      dateOfBirth: { type: Date, required: true },
-      monthlySalaryPaise: { type: Number, required: true },
-      employmentMode: { type: String, enum: EMPLOYMENT_MODES, required: true },
-    },
+    snapshot: { type: snapshotSchema, required: true },
 
     principalPaise: { type: Number, required: true },
     tenureDays: { type: Number, required: true },
@@ -61,3 +67,48 @@ loanSchema.index(
 );
 
 export const Loan = model("Loan", loanSchema);
+
+export type LoanDoc = HydratedDocument<InferSchemaType<typeof loanSchema>>;
+
+const rupees = (paise: number) => paiseToRupees(paise as Paise);
+const iso = (date: Date | null | undefined) => (date ? { value: date.toISOString() } : undefined);
+
+/**
+ * Lives beside the schema so the two cannot drift. Going through here is what
+ * keeps activeBorrowerId — an enforcement detail, not data the client needs —
+ * out of every payload.
+ */
+export function toLoanResponse(loan: LoanDoc): LoanResponse {
+  const sanctioned = iso(loan.sanctionedAt);
+  const disbursed = iso(loan.disbursedAt);
+  const closed = iso(loan.closedAt);
+  const rejected = iso(loan.rejectedAt);
+
+  return {
+    id: String(loan._id),
+    borrowerId: String(loan.borrowerId),
+    applicantName: loan.snapshot.fullName,
+    pan: loan.snapshot.pan,
+    principal: rupees(loan.principalPaise),
+    tenureDays: loan.tenureDays,
+    interestRatePercent: loan.interestRateBps / 100,
+    interest: rupees(loan.interestPaise),
+    totalRepayable: rupees(loan.totalRepayablePaise),
+    outstanding: rupees(loan.outstandingPaise),
+    status: loan.status,
+    statusHistory: loan.statusHistory.map(
+      (event): StatusEventResponse => ({
+        from: event.from,
+        to: event.to,
+        byRole: event.byRole,
+        at: event.at.toISOString(),
+        ...(event.reason ? { reason: event.reason } : {}),
+      }),
+    ),
+    appliedAt: loan.appliedAt.toISOString(),
+    ...(sanctioned ? { sanctionedAt: sanctioned.value } : {}),
+    ...(disbursed ? { disbursedAt: disbursed.value } : {}),
+    ...(closed ? { closedAt: closed.value } : {}),
+    ...(rejected ? { rejectedAt: rejected.value } : {}),
+  };
+}

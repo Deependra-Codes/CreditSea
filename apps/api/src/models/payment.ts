@@ -1,4 +1,6 @@
-import { Schema, Types, model } from "mongoose";
+import type { PaymentResponse } from "@lms/contracts";
+import { type Paise, paiseToRupees } from "@lms/domain";
+import { type HydratedDocument, type InferSchemaType, Schema, Types, model } from "mongoose";
 
 const paymentSchema = new Schema(
   {
@@ -18,3 +20,14 @@ const paymentSchema = new Schema(
 paymentSchema.index({ loanId: 1, paidAt: -1 });
 
 export const Payment = model("Payment", paymentSchema);
+
+export type PaymentDoc = HydratedDocument<InferSchemaType<typeof paymentSchema>>;
+
+export function toPaymentResponse(payment: PaymentDoc): PaymentResponse {
+  return {
+    id: String(payment._id),
+    utr: payment.utr,
+    amount: paiseToRupees(payment.amountPaise as Paise),
+    paidAt: payment.paidAt.toISOString(),
+  };
+}
