@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/*
+ * Validated with the dataviz palette validator — do not substitute by eye.
+ * The four lifecycle stages are one hue whose lightness carries the order,
+ * because reordering the stages would change their meaning. REJECTED sits
+ * outside the ramp: it is a terminal failure, not a further stage.
+ */
+@theme {
+  --color-ink: #0a2540;
+  --color-ink-2: #425466;
+  --color-ink-3: #697386;
+  --color-canvas: #ffffff;
+  --color-surface: #f6f9fc;
+  --color-line: #e3e8ee;
+  --color-line-2: #cfd7df;
+
+  --color-accent: #635bff;
+  --color-accent-dim: #8078ff;
+
+  --color-stage-1: #a79fff;
+  --color-stage-2: #8078ff;
+  --color-stage-3: #635bff;
+  --color-stage-4: #3f37c9;
+
+  --color-interest: #eb6834;
+  --color-critical: #e34948;
+  --color-good: #1baf7a;
+
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --radius-card: 8px;
+  --radius-ctrl: 6px;
+
+  --shadow-lift-1: 0 1px 1px rgb(10 37 64 / 0.04), 0 3px 6px rgb(10 37 64 / 0.05);
+  --shadow-lift-2: 0 2px 4px rgb(10 37 64 / 0.05), 0 8px 16px rgb(10 37 64 / 0.08);
+}
+
+/* Dark is selected against its own ground, not an inversion of light. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-ink: #eef2f8;
+    --color-ink-2: #a3b0c2;
+    --color-ink-3: #6f7d91;
+    --color-canvas: #0a0e1a;
+    --color-surface: #111726;
+    --color-line: #1e2738;
+    --color-line-2: #2c3548;
+
+    --color-accent: #8078ff;
+    --color-accent-dim: #635bff;
+
+    --color-stage-1: #3f37c9;
+    --color-stage-2: #635bff;
+    --color-stage-3: #8078ff;
+    --color-stage-4: #a79fff;
+
+    --color-interest: #d95926;
+    --color-critical: #e66767;
+    --color-good: #199e70;
+
+    --shadow-lift-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-lift-2: 0 4px 16px rgb(0 0 0 / 0.5);
+  }
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
