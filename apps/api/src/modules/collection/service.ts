@@ -20,7 +20,7 @@ export const paymentsFor = (loanId: string) => Payment.find({ loanId }).sort({ p
 export function recordPayment(loanId: string, input: PaymentInput, actor: Actor) {
   return withTransaction(async (session) => {
     // Insert first: a duplicate UTR then fails before the balance moves.
-    const [payment] = await Payment.create(
+    const inserted = await Payment.create(
       [
         {
           loanId,
@@ -31,7 +31,21 @@ export function recordPayment(loanId: string, input: PaymentInput, actor: Actor)
         },
       ],
       { session },
-    );
+    ).catch((err: { code?: number }) => {
+      // The unique index is what actually prevents the duplicate; this only
+      // names the field, because "that value already exists" tells the
+      // executive nothing about what to change.
+      if (err.code === 11000) {
+        throw HttpError.conflict(
+          "UTR_ALREADY_RECORDED",
+          `A payment with UTR ${input.utr} has already been recorded.`,
+        );
+      }
+      throw err;
+    });
+
+    const payment = inserted[0];
+    if (!payment) throw new Error("Payment insert returned nothing.");
 
     // Condition and decrement in one operation, so two concurrent payments
     // cannot both pass the check.
@@ -54,7 +68,6 @@ export function recordPayment(loanId: string, input: PaymentInput, actor: Actor)
         ? await transitionLoan({ loanId, to: "CLOSED", actor, session })
         : loan;
 
-    if (!payment) throw new Error("Payment insert returned nothing.");
     return { payment, loan: settled };
   });
 }
