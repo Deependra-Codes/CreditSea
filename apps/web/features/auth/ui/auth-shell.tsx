@@ -1,13 +1,7 @@
+import { LoanJourney } from "@/components/loan-journey";
 import { BadgeIndianRupee, CalendarRange, Percent } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-
-const STAGES = [
-  { label: "Applied", body: "You send your details and pick your terms.", dot: "bg-stage-1" },
-  { label: "Sanctioned", body: "The sanction team reviews and approves.", dot: "bg-stage-2" },
-  { label: "Disbursed", body: "Funds are released against the loan.", dot: "bg-stage-3" },
-  { label: "Closed", body: "You repay, and the loan settles itself.", dot: "bg-stage-4" },
-] as const;
 
 const TERMS = [
   { icon: BadgeIndianRupee, label: "Amount", value: "₹50K – ₹5L" },
@@ -22,10 +16,15 @@ const TERMS = [
  */
 function BrandPanel() {
   return (
-    <aside className="relative hidden overflow-hidden bg-canvas lg:flex lg:flex-col lg:justify-between lg:gap-10 lg:p-12">
+    <aside className="relative hidden overflow-hidden bg-canvas lg:flex lg:flex-col lg:justify-between lg:gap-8 lg:p-12">
+      <div aria-hidden className="dot-grid pointer-events-none absolute inset-0 opacity-50" />
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-40 -right-32 size-120 rounded-full bg-accent/10 blur-3xl"
+        className="drift-slow pointer-events-none absolute -top-40 -right-32 size-120 rounded-full bg-accent/12 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="drift-slower pointer-events-none absolute -bottom-32 -left-24 size-96 rounded-full bg-stage-1/10 blur-3xl"
       />
 
       <div className="relative flex flex-col gap-3">
@@ -41,20 +40,9 @@ function BrandPanel() {
         </p>
       </div>
 
-      <ol className="relative flex flex-col">
-        {STAGES.map((stage, index) => (
-          <li key={stage.label} className="flex gap-3.5">
-            <div className="flex flex-col items-center gap-1 pt-1.5">
-              <span className={`size-3 shrink-0 rounded-full ${stage.dot}`} />
-              {index < STAGES.length - 1 && <span className="w-0.5 flex-1 bg-line" />}
-            </div>
-            <div className="flex flex-col pb-5">
-              <span className="text-sm font-bold">{stage.label}</span>
-              <span className="text-xs text-ink-2">{stage.body}</span>
-            </div>
-          </li>
-        ))}
-      </ol>
+      <div className="relative">
+        <LoanJourney />
+      </div>
 
       <dl className="relative grid grid-cols-3 gap-3">
         {TERMS.map((term) => (

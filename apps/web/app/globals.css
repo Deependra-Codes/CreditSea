@@ -146,3 +146,99 @@ p {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ─── Ambient motion ──────────────────────────────────────────────────────
+   Two drifting blobs and a dot grid give the dark ground depth without
+   asking for attention. Both stop entirely under prefers-reduced-motion. */
+
+@utility dot-grid {
+  background-image: radial-gradient(circle at 1px 1px, var(--color-line) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+@utility drift-slow {
+  animation: drift 22s var(--ease-standard) infinite alternate;
+}
+
+@utility drift-slower {
+  animation: drift 30s var(--ease-standard) infinite alternate-reverse;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-8%, 6%, 0) scale(1.15);
+  }
+}
+
+/* ─── The loan journey ─────────────────────────────────────────────────────
+   A token travels the pipeline and each stop lights as it arrives, on an
+   8s loop. It is the product's own lifecycle, not decoration. */
+
+@utility journey-token {
+  animation: travel 8s var(--ease-standard) infinite;
+}
+
+@keyframes travel {
+  0%,
+  4% {
+    left: 0%;
+    opacity: 0;
+  }
+  8% {
+    left: 0%;
+    opacity: 1;
+  }
+  28% {
+    left: 33.333%;
+  }
+  52% {
+    left: 66.666%;
+  }
+  76%,
+  92% {
+    left: 100%;
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes arrive {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  40% {
+    transform: scale(1.5);
+    box-shadow: 0 0 0 6px var(--color-accent-sub);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@keyframes fill-track {
+  0%,
+  6% {
+    transform: scaleX(0);
+  }
+  76%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-token,
+  .drift-slow,
+  .drift-slower {
+    animation: none !important;
+  }
+}

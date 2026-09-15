@@ -1,7 +1,7 @@
 "use client";
 
+import { AnimatedMoney } from "@/components/animated-money";
 import { Button } from "@/components/button";
-import { Money } from "@/components/money";
 import { ApiClientError, api } from "@/lib/api";
 import type { LoanResponse } from "@lms/contracts";
 import {
@@ -108,7 +108,7 @@ export function LoanConfigurator() {
           <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-3">
             Total repayment
           </span>
-          <Money
+          <AnimatedMoney
             paise={quote.totalRepayablePaise}
             className="text-[clamp(2.4rem,7vw,3.2rem)] font-extrabold leading-[1.02] tracking-[-0.04em]"
           />
