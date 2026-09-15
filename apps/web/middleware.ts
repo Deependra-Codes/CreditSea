@@ -61,5 +61,9 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Static assets must be excluded by extension, not just by folder. Next serves
+  // the app icon from /icon.svg, which this matcher was catching and redirecting
+  // to /login — so a signed-out visitor's browser asked for an image and was
+  // handed HTML, and the favicon never rendered on the one page they could see.
+  matcher: ["/((?!_next/static|_next/image|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
 };
