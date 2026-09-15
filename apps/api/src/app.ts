@@ -4,6 +4,7 @@ import cors from "cors";
 import express, { type Express } from "express";
 import { env } from "./lib/env";
 import { errorHandler, notFound } from "./middleware/error";
+import { authRoutes } from "./modules/auth/auth.routes";
 
 export function createApp(): Express {
   const app = express();
@@ -15,6 +16,8 @@ export function createApp(): Express {
   app.get("/api/health", (_req, res) => {
     res.json(ok({ status: "up" }));
   });
+
+  app.use("/api/auth", authRoutes);
 
   app.use(notFound);
   app.use(errorHandler);
