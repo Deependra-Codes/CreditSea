@@ -1,5 +1,4 @@
-import { EMPLOYMENT_MODES } from "@lms/contracts";
-import { LOAN_STATUSES, ROLES } from "@lms/domain";
+import { EMPLOYMENT_MODES, LOAN_STATUSES, ROLES } from "@lms/domain";
 import { Schema, Types, model } from "mongoose";
 
 const statusEventSchema = new Schema(

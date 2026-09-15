@@ -5,8 +5,12 @@ import { PAN_FORMAT } from "./pan";
 export const MIN_AGE = 23;
 export const MAX_AGE = 50;
 export const MIN_MONTHLY_SALARY_PAISE = 2_500_000 as Paise;
+/** Sanity ceiling only — keeps absurd input out of storage, not a business rule. */
+export const MAX_MONTHLY_SALARY_PAISE = 1_000_000_000 as Paise; // ₹1 crore/month
 
-export type EmploymentMode = "SALARIED" | "SELF_EMPLOYED" | "UNEMPLOYED";
+export const EMPLOYMENT_MODES = ["SALARIED", "SELF_EMPLOYED", "UNEMPLOYED"] as const;
+export type EmploymentMode = (typeof EMPLOYMENT_MODES)[number];
+
 export type BreCode = "AGE" | "SALARY" | "PAN" | "EMPLOYMENT";
 
 export type Applicant = {

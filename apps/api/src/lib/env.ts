@@ -4,20 +4,27 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
-  JWT_SECRET: z.string().min(16, "JWT_SECRET must be at least 16 characters"),
+  JWT_SECRET: z
+    .string()
+    .min(16, "JWT_SECRET must be at least 16 characters")
+    .refine(
+      (v) => !v.startsWith("replace-with"),
+      "JWT_SECRET is still the .env.example placeholder",
+    ),
   WEB_ORIGIN: z.string().url().default("http://localhost:3000"),
   UPLOAD_DIR: z.string().default("./uploads"),
 });
 
-const parsed = envSchema.safeParse(process.env);
+export type Env = z.infer<typeof envSchema>;
 
-// Failing here beats discovering a missing secret on the first login.
-if (!parsed.success) {
-  console.error("Invalid environment:");
-  for (const issue of parsed.error.issues) {
-    console.error(`  ${issue.path.join(".")}: ${issue.message}`);
-  }
-  process.exit(1);
+function parseEnv(): Env {
+  const parsed = envSchema.safeParse(process.env);
+  if (parsed.success) return parsed.data;
+
+  // Throw rather than process.exit: exiting at import time makes every module
+  // that touches env untestable. Entrypoints catch this and exit cleanly.
+  const lines = parsed.error.issues.map((i) => `  ${i.path.join(".")}: ${i.message}`);
+  throw new Error(`Invalid environment:\n${lines.join("\n")}`);
 }
 
-export const env = parsed.data;
+export const env = parseEnv();

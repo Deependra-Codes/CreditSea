@@ -33,4 +33,9 @@ export const validate =
     next();
   };
 
-export const validated = <T>(req: Request): T => req.valid as T;
+export const validated = <T>(req: Request): T => {
+  if (req.valid === undefined) {
+    throw new Error("validate() middleware is missing on this route.");
+  }
+  return req.valid as T;
+};

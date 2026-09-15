@@ -6,6 +6,12 @@ export const MAX_PRINCIPAL_PAISE = 50_000_000 as Paise;
 export const MIN_TENURE_DAYS = 30;
 export const MAX_TENURE_DAYS = 365;
 
+/** The largest amount any loan can ever owe: max principal over max tenure. */
+export const MAX_REPAYABLE_PAISE = (MAX_PRINCIPAL_PAISE +
+  Math.round(
+    (MAX_PRINCIPAL_PAISE * INTEREST_RATE_BPS * MAX_TENURE_DAYS) / (365 * 10_000),
+  )) as Paise;
+
 export type LoanQuote = {
   principalPaise: Paise;
   tenureDays: number;

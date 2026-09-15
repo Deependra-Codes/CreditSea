@@ -1,5 +1,4 @@
 import { type LoginInput, type PublicUser, type RegisterInput, ok } from "@lms/contracts";
-import type { Role } from "@lms/domain";
 import type { Request, Response } from "express";
 import { env } from "../../lib/env";
 import { HttpError } from "../../lib/http-error";
@@ -8,13 +7,12 @@ import { validated } from "../../middleware/validate";
 import { User } from "../../models/user";
 import { TOKEN_TTL_SECONDS, hashPassword, signToken, verifyPassword } from "./auth.service";
 
-type UserRow = { _id: unknown; fullName: string; email: string; role: string };
-
-const toPublicUser = (user: UserRow): PublicUser => ({
+// Mongoose infers role as the exact Role union from `enum: ROLES`, so no cast.
+const toPublicUser = (user: InstanceType<typeof User>): PublicUser => ({
   id: String(user._id),
   fullName: user.fullName,
   email: user.email,
-  role: user.role as Role,
+  role: user.role,
 });
 
 function setAuthCookie(res: Response, token: string) {
@@ -42,7 +40,7 @@ export async function register(req: Request, res: Response) {
     role: "BORROWER",
   });
 
-  setAuthCookie(res, signToken({ sub: String(user._id), role: "BORROWER" }));
+  setAuthCookie(res, signToken({ sub: String(user._id), role: user.role }));
   res.status(201).json(ok({ user: toPublicUser(user) }));
 }
 
@@ -55,7 +53,7 @@ export async function login(req: Request, res: Response) {
     throw new HttpError(401, "INVALID_CREDENTIALS", "Email or password is incorrect.");
   }
 
-  setAuthCookie(res, signToken({ sub: String(user._id), role: user.role as Role }));
+  setAuthCookie(res, signToken({ sub: String(user._id), role: user.role }));
   res.json(ok({ user: toPublicUser(user) }));
 }
 
@@ -65,7 +63,11 @@ export function logout(_req: Request, res: Response) {
 }
 
 export async function me(req: Request, res: Response) {
-  const user = await User.findById(req.user?.id);
+  // findById(undefined) casts to findOne({}) and returns an arbitrary user.
+  // Never hand a possibly-undefined id to a finder.
+  if (!req.user) throw HttpError.unauthorized();
+
+  const user = await User.findById(req.user.id);
   if (!user) throw HttpError.unauthorized();
   res.json(ok({ user: toPublicUser(user) }));
 }

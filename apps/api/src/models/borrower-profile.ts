@@ -1,4 +1,4 @@
-import { EMPLOYMENT_MODES } from "@lms/contracts";
+import { EMPLOYMENT_MODES } from "@lms/domain";
 import { Schema, Types, model } from "mongoose";
 
 const salarySlipSchema = new Schema(

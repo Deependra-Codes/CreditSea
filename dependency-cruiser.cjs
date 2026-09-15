@@ -44,7 +44,10 @@ module.exports = {
   ],
   options: {
     doNotFollow: { path: "node_modules" },
-    exclude: { path: ["node_modules", "\\.next", "dist", "coverage", "\\.test\\.ts$"] },
+    // node_modules is NOT excluded: doNotFollow already stops traversal, and
+    // excluding it drops the edge entirely, so a declared runtime dependency in
+    // packages/domain would slip past domain-stays-pure unseen.
+    exclude: { path: ["\\.next", "dist", "coverage", "\\.test\\.ts$", "vitest\\.config\\.ts$"] },
     tsConfig: { fileName: "tsconfig.base.json" },
     tsPreCompilationDeps: true,
   },

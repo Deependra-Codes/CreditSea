@@ -1,9 +1,10 @@
 import {
   MAX_PRINCIPAL_PAISE,
+  MAX_REPAYABLE_PAISE,
   MAX_TENURE_DAYS,
   MIN_PRINCIPAL_PAISE,
   MIN_TENURE_DAYS,
-  rupeesToPaise,
+  type Paise,
 } from "@lms/domain";
 import { z } from "zod";
 import { rupeeAmount } from "./money";
@@ -25,7 +26,8 @@ export const sanctionSchema = z
 
 export const paymentSchema = z.object({
   utr: z.string().trim().toUpperCase().min(6).max(32),
-  amount: z.number().finite().positive().transform(rupeesToPaise),
+  // Ceiling is a sanity bound; the real limit is the loan's outstanding balance.
+  amount: rupeeAmount(1 as Paise, MAX_REPAYABLE_PAISE),
   // refine, not .max(new Date()): the latter freezes "now" at module load.
   paidAt: z.coerce
     .date()

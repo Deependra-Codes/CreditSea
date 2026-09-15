@@ -11,7 +11,7 @@ describe("rupeesToPaise", () => {
     expect(rupeesToPaise(0.1 + 0.2)).toBe(30); // 0.30000000000000004
   });
 
-  it("rounds half away from zero at the paise boundary", () => {
+  it("rounds half up at the paise boundary", () => {
     expect(rupeesToPaise(1.005)).toBe(101); // 1.005 * 100 === 100.49999999999999
   });
 

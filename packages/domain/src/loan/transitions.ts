@@ -18,12 +18,12 @@ export const TRANSITIONS = {
   REJECTED: {},
 } as const satisfies Record<LoanStatus, Partial<Record<LoanStatus, Role>>>;
 
-/** The status each executive module works on. */
+/** The status each executive module works on. Non-partial so a row cannot be dropped. */
 export const QUEUE_STATUS = {
   SANCTION: "APPLIED",
   DISBURSEMENT: "SANCTIONED",
   COLLECTION: "DISBURSED",
-} as const satisfies Partial<Record<Role, LoanStatus>>;
+} as const satisfies Record<"SANCTION" | "DISBURSEMENT" | "COLLECTION", LoanStatus>;
 
 /** Timestamp field stamped when a loan enters each status. */
 export const STATUS_TIMESTAMP = {
