@@ -4,8 +4,8 @@ import { Button } from "@/components/button";
 import { Field, inputClass } from "@/components/field";
 import { useState } from "react";
 import { useAuthSubmit } from "../model/use-auth-submit";
-import { FormError } from "./auth-shell";
 import { DemoAccounts } from "./demo-accounts";
+import { FormError } from "./form-error";
 
 export function LoginForm() {
   const { submit, pending, formError, fieldErrors } = useAuthSubmit("/api/auth/login");

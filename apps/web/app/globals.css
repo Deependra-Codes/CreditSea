@@ -272,3 +272,23 @@ p {
     animation: none !important;
   }
 }
+
+/* The mesh breathes on a long cycle — slow enough to notice only on a second look. */
+@utility mesh-drift {
+  animation: mesh-drift 26s var(--ease-standard) infinite alternate;
+}
+
+@keyframes mesh-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  to {
+    transform: translate3d(3%, -4%, 0) scale(1.12) rotate(4deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mesh-drift {
+    animation: none !important;
+  }
+}
