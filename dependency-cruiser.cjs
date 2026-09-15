@@ -36,6 +36,27 @@ module.exports = {
       to: { path: "^apps/api/src/modules" },
     },
     {
+      name: "route-shells-cannot-reach-feature-internals",
+      comment: "app/ imports a feature's public entry, never its internals.",
+      severity: "error",
+      from: { path: "^apps/web/app" },
+      to: { path: "^apps/web/features/[^/]+/(?!public(?:/|$))" },
+    },
+    {
+      name: "web-slices-cannot-cross-import",
+      comment: "Feature slices share through components, lib or domain — never each other.",
+      severity: "error",
+      from: { path: "^apps/web/features/([^/]+)/" },
+      to: { path: "^apps/web/features/(?!$1/)[^/]+/" },
+    },
+    {
+      name: "components-stay-primitive",
+      comment: "Shared primitives must not grow app or feature knowledge.",
+      severity: "error",
+      from: { path: "^apps/web/components" },
+      to: { path: "^apps/web/(app|features)" },
+    },
+    {
       name: "no-dumping-ground-folders",
       severity: "error",
       from: {},
@@ -48,7 +69,9 @@ module.exports = {
     // excluding it drops the edge entirely, so a declared runtime dependency in
     // packages/domain would slip past domain-stays-pure unseen.
     exclude: { path: ["\\.next", "dist", "coverage", "\\.test\\.ts$", "vitest\\.config\\.ts$"] },
-    tsConfig: { fileName: "tsconfig.base.json" },
+    // Resolves apps/web's "@/" alias. Without it those imports are unresolvable,
+    // drop out of the graph, and the web rules above silently never fire.
+    tsConfig: { fileName: "tsconfig.depcruise.json" },
     tsPreCompilationDeps: true,
   },
 };

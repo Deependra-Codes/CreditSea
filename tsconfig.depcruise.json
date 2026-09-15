@@ -1,0 +1,8 @@
+{
+  "//": "Build configs never use this. It exists so dependency-cruiser can resolve apps/web's \"@/\" alias from the repo root — without it those imports drop out of the graph and the web boundary rules silently never fire.",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@/*": ["apps/web/*"] }
+  }
+}
