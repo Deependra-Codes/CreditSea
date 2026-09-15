@@ -62,6 +62,7 @@ export function DisbursementQueue({ loans }: { loans: LoanResponse[] }) {
       rows={loans}
       columns={loanColumns}
       getRowId={(loan) => loan.id}
+      searchText={(loan) => `${loan.applicantName} ${loan.pan}`}
       empty={{
         icon: Banknote,
         title: "Nothing to disburse",

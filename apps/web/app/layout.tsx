@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
+import { ThemeScript } from "./theme-script";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body>
+        <ThemeScript />
         {children}
         <Toaster
           position="bottom-right"

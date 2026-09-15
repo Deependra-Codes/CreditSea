@@ -28,6 +28,8 @@ function roleFromToken(token: string | undefined): Role | null {
 
 function homeFor(role: Role): string {
   if (role === "BORROWER") return "/apply";
+  // Admin spans every module, so the aggregate is the sensible landing.
+  if (role === "ADMIN") return "/dashboard/overview";
   const owned = (Object.keys(MODULE_ROLES) as ModuleName[]).find((module) =>
     (MODULE_ROLES[module] as readonly Role[]).includes(role),
   );

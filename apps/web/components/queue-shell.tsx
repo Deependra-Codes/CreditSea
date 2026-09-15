@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 import { Fragment, type ReactNode, useState } from "react";
 import { EmptyState } from "./empty-state";
 
@@ -32,6 +32,7 @@ export function QueueShell<T>({
   rows,
   columns,
   getRowId,
+  searchText,
   empty,
   renderDetail,
 }: {
@@ -41,10 +42,19 @@ export function QueueShell<T>({
   rows: T[];
   columns: Column<T>[];
   getRowId: (row: T) => string;
+  /** What a search matches against. Omit it and the box is not shown. */
+  searchText?: (row: T) => string;
   empty: { icon: LucideIcon; title: string; body: string };
   renderDetail?: (row: T) => ReactNode;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+
+  const needle = query.trim().toLowerCase();
+  const visible =
+    searchText && needle
+      ? rows.filter((row) => searchText(row).toLowerCase().includes(needle))
+      : rows;
 
   return (
     <section className="flex flex-col gap-5">
@@ -52,7 +62,7 @@ export function QueueShell<T>({
         <div className="flex flex-wrap items-baseline gap-3">
           <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
           <span className="rounded-full bg-accent-sub px-2 py-0.5 text-xs font-bold text-accent">
-            {rows.length}
+            {needle ? `${visible.length} of ${rows.length}` : rows.length}
           </span>
         </div>
         <p className="text-sm text-ink-2">{subtitle}</p>
@@ -82,7 +92,25 @@ export function QueueShell<T>({
         </div>
       )}
 
-      {rows.length === 0 ? (
+      {searchText && rows.length > 0 && (
+        <label className="enter relative flex items-center" style={{ animationDelay: "90ms" }}>
+          <Search className="pointer-events-none absolute left-3 size-4 text-ink-3" aria-hidden />
+          <span className="sr-only">Search this queue</span>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search by name or PAN…"
+            className="w-full rounded-ctrl bg-canvas py-2 pr-3 pl-9 text-sm ring-1 ring-line transition-shadow focus:ring-1 focus:ring-accent focus:outline-none sm:max-w-xs"
+          />
+        </label>
+      )}
+
+      {visible.length === 0 && needle ? (
+        <p className="rounded-card bg-canvas px-5 py-10 text-center text-sm text-ink-3 ring-1 ring-line-soft">
+          Nothing here matches &ldquo;{query}&rdquo;.
+        </p>
+      ) : rows.length === 0 ? (
         <EmptyState icon={empty.icon} title={empty.title} body={empty.body} />
       ) : (
         <div
@@ -109,7 +137,7 @@ export function QueueShell<T>({
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => {
+              {visible.map((row) => {
                 const id = getRowId(row);
                 const open = openId === id;
 

@@ -82,6 +82,7 @@ export function SanctionQueue({ loans }: { loans: LoanResponse[] }) {
       rows={loans}
       columns={loanColumns}
       getRowId={(loan) => loan.id}
+      searchText={(loan) => `${loan.applicantName} ${loan.pan}`}
       empty={{
         icon: FileCheck2,
         title: "Nothing waiting",

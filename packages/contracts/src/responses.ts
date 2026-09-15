@@ -73,6 +73,24 @@ export type LeadResponse = {
   hasActiveLoan: boolean;
 };
 
+export type OverviewResponse = {
+  borrowers: number;
+  totalLoans: number;
+  lent: number;
+  outstanding: number;
+  collected: number;
+  paymentCount: number;
+  byStatus: { status: LoanStatus; count: number; principal: number }[];
+  activity: {
+    loanId: string;
+    applicantName: string;
+    to: LoanStatus;
+    byRole: Role;
+    at: string;
+    reason?: string;
+  }[];
+};
+
 export type ApplicationResponse = {
   profile: ProfileResponse | null;
   activeLoan: LoanResponse | null;

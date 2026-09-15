@@ -144,6 +144,7 @@ export function CollectionQueue({ loans }: { loans: LoanResponse[] }) {
       rows={loans}
       columns={[...loanColumns, outstanding]}
       getRowId={(loan) => loan.id}
+      searchText={(loan) => `${loan.applicantName} ${loan.pan}`}
       empty={{
         icon: Wallet,
         title: "No active loans",

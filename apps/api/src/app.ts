@@ -10,6 +10,7 @@ import { collectionRoutes } from "./modules/collection/routes";
 import { disbursementRoutes } from "./modules/disbursement/routes";
 import { fileRoutes } from "./modules/files/routes";
 import { loanRoutes } from "./modules/loan/routes";
+import { overviewRoutes } from "./modules/overview/routes";
 import { salesRoutes } from "./modules/sales/routes";
 import { sanctionRoutes } from "./modules/sanction/routes";
 
@@ -29,6 +30,7 @@ export function createApp(): Express {
   app.use("/api/loans", loanRoutes);
   app.use("/api/files", fileRoutes);
 
+  app.use("/api/overview", overviewRoutes);
   app.use("/api/sales", salesRoutes);
   app.use("/api/sanction", sanctionRoutes);
   app.use("/api/disbursement", disbursementRoutes);

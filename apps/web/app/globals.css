@@ -42,9 +42,13 @@
   --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Dark is selected against its own ground, not an inversion of light. */
+/*
+ * Dark is selected against its own ground, not an inversion of light, and is
+ * declared three times on purpose: the media query covers the OS setting, and
+ * the two [data-theme] scopes let an explicit choice win in both directions.
+ */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --color-ink: #f0f4f8;
     --color-ink-2: #9aa7b8;
     --color-ink-3: #6f7d91;
@@ -69,6 +73,32 @@
     --color-warning: #d08a1e;
     --color-critical: #e05252;
   }
+}
+
+:root[data-theme="dark"] {
+  --color-ink: #f0f4f8;
+  --color-ink-2: #9aa7b8;
+  --color-ink-3: #6f7d91;
+  --color-canvas: #131720;
+  --color-surface: #0b0f1a;
+  --color-line: rgb(240 244 248 / 0.12);
+  --color-line-soft: rgb(240 244 248 / 0.07);
+
+  --color-accent: #2ba89e;
+  --color-accent-ink: #06231f;
+  --color-accent-sub: rgb(43 168 158 / 0.14);
+
+  --color-stage-1: #134e4a;
+  --color-stage-2: #0f766e;
+  --color-stage-3: #0d9488;
+  --color-stage-4: #2dd4bf;
+
+  --color-principal: #0d9488;
+  --color-interest: #d95926;
+
+  --color-good: #22a35a;
+  --color-warning: #d08a1e;
+  --color-critical: #e05252;
 }
 
 body {

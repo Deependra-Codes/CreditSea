@@ -58,6 +58,7 @@ export function SalesLeads({ leads }: { leads: LeadResponse[] }) {
       rows={leads}
       columns={columns}
       getRowId={(lead) => lead.id}
+      searchText={(lead) => `${lead.fullName} ${lead.email} ${lead.pan ?? ""}`}
       empty={{
         icon: UserPlus,
         title: "No leads yet",
