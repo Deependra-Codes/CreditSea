@@ -1,69 +1,57 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { type MouseEvent, useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 
-type Choice = "light" | "dark" | "system";
-
-const OPTIONS: { value: Choice; label: string; icon: typeof Sun }[] = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "System", icon: Monitor },
-];
-
+type Theme = "light" | "dark";
 const KEY = "lms-theme";
 
-/** "system" stamps nothing, so prefers-color-scheme keeps deciding. */
-function stamp(choice: Choice) {
-  const root = document.documentElement;
-  if (choice === "system") root.removeAttribute("data-theme");
-  else root.setAttribute("data-theme", choice);
-}
+const stamp = (theme: Theme) => document.documentElement.setAttribute("data-theme", theme);
 
 /** Far enough to reach the corner furthest from the click, or the circle stops short. */
-function radiusToFurthestCorner(x: number, y: number) {
-  return Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-}
+const radiusToFurthestCorner = (x: number, y: number) =>
+  Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
 
 /**
- * Real radio inputs rather than buttons wearing role="radio": three mutually
- * exclusive choices are what a radio group is, and the browser then supplies
- * arrow-key navigation and the correct announcement for free.
+ * One switch, not three choices. The OS preference still decides what a first
+ * visit looks like — it is simply not a third button, because "system" is the
+ * state you are already in before you touch anything.
  *
- * The new theme is then wiped in as a circle growing from the control that was
- * clicked. Progressive enhancement throughout — without View Transitions, or
- * under reduced motion, the theme simply changes.
+ * The new theme is wiped in as a circle growing from the switch. Entirely
+ * progressive: without View Transitions, or under reduced motion, it just
+ * changes.
  */
 export function ThemeToggle() {
-  const [choice, setChoice] = useState<Choice>("system");
+  const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
-    const stored = localStorage.getItem(KEY) as Choice | null;
-    if (stored === "light" || stored === "dark") {
-      setChoice(stored);
-      stamp(stored);
-    }
+    const stored = localStorage.getItem(KEY) as Theme | null;
+    const resolved =
+      stored ?? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    setTheme(resolved);
+    if (stored) stamp(stored);
   }, []);
 
-  function remember(next: Choice) {
+  function toggle(event: MouseEvent<HTMLButtonElement>) {
+    const next: Theme = theme === "dark" ? "light" : "dark";
+
     try {
-      if (next === "system") localStorage.removeItem(KEY);
-      else localStorage.setItem(KEY, next);
+      localStorage.setItem(KEY, next);
     } catch {
       // A private window can refuse storage; the choice still holds this session.
     }
-  }
 
-  function pick(next: Choice, event: MouseEvent<HTMLInputElement>) {
-    remember(next);
-
-    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const supported = typeof document.startViewTransition === "function";
-
-    if (reduced || !supported) {
-      setChoice(next);
+    const plain = () => {
+      setTheme(next);
       stamp(next);
+    };
+
+    if (
+      matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      typeof document.startViewTransition !== "function"
+    ) {
+      plain();
       return;
     }
 
@@ -72,12 +60,7 @@ export function ThemeToggle() {
     const y = box.top + box.height / 2;
 
     // flushSync so the DOM already carries the new theme when the API snapshots it.
-    const transition = document.startViewTransition(() => {
-      flushSync(() => {
-        setChoice(next);
-        stamp(next);
-      });
-    });
+    const transition = document.startViewTransition(() => flushSync(plain));
 
     transition.ready.then(() => {
       document.documentElement.animate(
@@ -88,37 +71,29 @@ export function ThemeToggle() {
           ],
         },
         {
-          duration: 620,
-          easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          duration: 520,
+          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
           pseudoElement: "::view-transition-new(root)",
         },
       );
     });
   }
 
-  return (
-    <fieldset className="flex gap-0.5 rounded-full bg-surface p-0.5 ring-1 ring-line-soft">
-      <legend className="sr-only">Colour theme</legend>
+  const nextLabel = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
 
-      {OPTIONS.map((option) => (
-        <label
-          key={option.value}
-          title={option.label}
-          className="grid size-6 cursor-pointer place-items-center rounded-full text-ink-3 transition-colors hover:text-ink has-checked:bg-accent has-checked:text-accent-ink"
-        >
-          <input
-            type="radio"
-            name="theme"
-            value={option.value}
-            checked={choice === option.value}
-            onChange={() => undefined}
-            onClick={(event) => pick(option.value, event)}
-            className="sr-only"
-          />
-          <option.icon className="size-3.5" aria-hidden />
-          <span className="sr-only">{option.label}</span>
-        </label>
-      ))}
-    </fieldset>
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      title={nextLabel}
+      aria-label={nextLabel}
+      className="grid size-8 place-items-center rounded-full bg-surface text-ink-2 ring-1 ring-line-soft transition-colors hover:text-ink hover:ring-accent/40"
+    >
+      {theme === "dark" ? (
+        <Sun className="size-4" aria-hidden />
+      ) : (
+        <Moon className="size-4" aria-hidden />
+      )}
+    </button>
   );
 }

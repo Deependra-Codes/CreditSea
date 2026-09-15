@@ -1,3 +1,4 @@
+import { Logo } from "@/components/logo";
 import type { ReactNode } from "react";
 import { LogoutButton } from "./logout-button";
 
@@ -6,9 +7,7 @@ export function PortalShell({ children }: { children: ReactNode }) {
     <div className="min-h-dvh">
       <header className="border-b border-line bg-canvas">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-          <span className="text-xs font-semibold uppercase tracking-[0.1em] text-accent">
-            Lending Portal
-          </span>
+          <Logo markClassName="size-6" />
           <LogoutButton />
         </div>
       </header>

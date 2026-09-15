@@ -5,8 +5,8 @@ import { ThemeScript } from "./theme-script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Lending Portal",
-  description: "Apply for a loan and track it through to closure.",
+  title: "Marg Lending",
+  description: "One path, four stops. Apply for a loan and track it through to closure.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

@@ -1,3 +1,4 @@
+import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { PublicUser } from "@lms/contracts";
 import Link from "next/link";
@@ -29,8 +30,8 @@ export function DashboardShell({
     <div className="min-h-dvh">
       <header className="sticky top-0 z-20 border-b border-line bg-canvas/85 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-3 px-4 py-3">
-          <Link href="/" className="text-xs font-bold uppercase tracking-[0.12em] text-accent">
-            Operations
+          <Link href="/" aria-label="Marg Lending">
+            <Logo markClassName="size-6" showWord={false} />
           </Link>
 
           <nav className="flex flex-wrap gap-1" aria-label="Sections">

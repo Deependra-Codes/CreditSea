@@ -1,6 +1,7 @@
 "use client";
 
 import { LiveLoanCard } from "@/components/live-loan-card";
+import { Logo } from "@/components/logo";
 import { MeshBackdrop } from "@/components/mesh-backdrop";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BadgeIndianRupee, CalendarRange, Percent } from "lucide-react";
@@ -69,9 +70,7 @@ export function AuthScreen({ initialMode }: { initialMode: AuthMode }) {
         <MeshBackdrop />
 
         <div className="relative flex flex-col gap-2.5">
-          <span className="text-xs font-bold uppercase tracking-[0.12em] text-accent">
-            Lending Portal
-          </span>
+          <Logo className="mb-1" markClassName="size-7" />
           <h2 className="max-w-md text-[2.6rem] font-extrabold leading-[1.05] tracking-[-0.03em]">
             Four steps to a loan, and four hands that move it.
           </h2>
@@ -112,9 +111,7 @@ export function AuthScreen({ initialMode }: { initialMode: AuthMode }) {
           style={{ animationDelay: "220ms" }}
         >
           <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-bold uppercase tracking-[0.12em] text-accent lg:hidden">
-              Lending Portal
-            </span>
+            <Logo className="mb-1 lg:hidden" />
             <h1 className="text-4xl font-extrabold tracking-tight text-balance">{copy.title}</h1>
             <p className="text-sm text-ink-2">{copy.subtitle}</p>
           </div>
