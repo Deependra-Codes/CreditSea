@@ -14,8 +14,10 @@ export function Field({
 }: {
   label: string;
   htmlFor: string;
-  hint?: string;
-  error?: string;
+  // Explicitly `| undefined`: a lookup into a field-error record yields that,
+  // and exactOptionalPropertyTypes treats "absent" and "undefined" as different.
+  hint?: string | undefined;
+  error?: string | undefined;
   children: ReactNode;
 }) {
   return (
