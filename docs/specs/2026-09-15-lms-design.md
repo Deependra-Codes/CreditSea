@@ -169,8 +169,12 @@ export const PAN_STRICT = /^[A-Z]{3}[ABCFGHLJPTE][A-Z][0-9]{4}[A-Z]$/;  // docum
 
 `PAN_FORMAT` is enforced. `PAN_STRICT` is implemented and unit-tested but not applied,
 because common test values such as `ABCDE1234F` have an invalid holder-type character
-and rejecting them would look like a bug to an evaluator. The README states this
-trade-off rather than hiding it.
+and rejecting them would look like a bug to an evaluator.
+
+This trade-off is documented **in a comment beside the regex**, not only in the README —
+the person tempted to "fix" the loose pattern is reading the code, not the docs. A test
+asserts that `PAN_FORMAT` accepts `ABCDE1234F`, so swapping in the strict pattern fails
+the suite and explains itself.
 
 ### 5.3 Where the BRE runs
 
@@ -292,6 +296,24 @@ timestamp.
 Four modules performing their own transitions would mean four chances to forget the
 guard — and one forgotten guard is an RBAC hole.
 
+**The write is conditional on the observed status.** A single write point does not by
+itself prevent two concurrent transitions: two Sanction requests can both read
+`APPLIED`, both pass `checkTransition`, and both write. The expected current status
+must therefore be part of the query, not just of the in-memory check:
+
+```ts
+Loan.findOneAndUpdate(
+  { _id: loanId, status: from },                    // ← the guard that actually holds
+  { $set: { status: to, [stampFor(to)]: now },
+    $push: { statusHistory: { from, to, by, byRole, at: now, reason } } },
+  { new: true },
+);
+```
+
+A `null` result means another request already moved the loan, and maps to `409`. This
+is the same optimistic-concurrency pattern used for payments in §8; both places need
+it for the same reason.
+
 ---
 
 ## 8. Payments and auto-close
@@ -316,9 +338,20 @@ The comparison is exact integer equality — see §4.
 Validation on amount: integer, `> 0`, `<= outstandingPaise`. UTR: non-empty, trimmed,
 uppercased, unique.
 
-Atlas M0 is a three-node replica set, so multi-document transactions are available if
-the payment insert and loan update need to be strictly atomic together. The conditional
-update is sufficient for this scope; the upgrade path is noted in the README.
+**The whole operation runs in a transaction, from the first implementation.** The
+conditional update alone leaves a real gap: if the balance is decremented and the
+payment insert then fails, the loan claims money was paid with no payment record
+behind it.
+
+That failure is not exotic here — a duplicate UTR is a *designed-for* rejection in
+this system, so the insert failing is an expected path rather than a rare accident.
+Reordering does not help either: inserting the payment first leaves an orphaned payment
+whenever the conditional update rejects.
+
+Atlas M0 is a three-node replica set, so `session.withTransaction()` is available, and
+with mongoose it costs a handful of lines. Payment insert, outstanding decrement, and
+any resulting `CLOSED` transition commit together or not at all. In a lending system,
+money that disagrees with its audit trail is the worst failure available.
 
 ---
 
@@ -354,6 +387,54 @@ grades the API rejecting the request directly.
 | disbursement | `DISBURSEMENT`, `ADMIN` |
 | collection | `COLLECTION`, `ADMIN` |
 
+`ADMIN` is not an implicit exception scattered through the code. It is one explicit
+clause inside `authorize()` and one inside `checkTransition()`, each with its own test.
+A privilege that lives in prose is a privilege nobody can audit.
+
+### Which loans an executive may read
+
+"Owner or module role" is too broad to implement safely — read literally it would let a
+Sales executive pull the full financial record of every loan in the system. Loan
+documents carry PAN, salary and repayment data, so visibility is defined precisely:
+
+A user may read a loan when **any** of these holds:
+
+1. they are the borrower who owns it, or
+2. they are `ADMIN`, or
+3. the loan is currently in their module's queue status
+   (`SANCTION`→`APPLIED`, `DISBURSEMENT`→`SANCTIONED`, `COLLECTION`→`DISBURSED`), or
+4. their role appears in the loan's `statusHistory` — they acted on it earlier and can
+   still see what became of it.
+
+Clause 4 exists so a sanction executive can follow a loan they approved rather than
+losing it the moment it moves on. `SALES` matches none of these clauses and therefore
+sees leads only, never loan financials — which is correct, since Sales works the
+pre-application stage by definition.
+
+### Salary slip storage and access
+
+| Control | Rule |
+|---|---|
+| Size | 5 MB hard limit, enforced by multer before the handler runs |
+| Extension | `.pdf`, `.jpg`, `.jpeg`, `.png` only |
+| Declared type | `application/pdf`, `image/jpeg`, `image/png` |
+| **Actual type** | magic bytes checked: `%PDF`, `FF D8 FF`, `89 50 4E 47`. A client-declared MIME type is a claim, not evidence |
+| Stored name | server-generated UUID + canonical extension. User input never reaches a filesystem path, so traversal is impossible by construction rather than by sanitising |
+| Original name | retained for display only, trimmed to 255 characters |
+| Access | `GET /api/files/salary-slip/:userId`, behind `authenticate` plus the same visibility rule above. Never a static directory |
+
+The upload directory is in `.gitignore` and is not served by any static middleware. If
+it were, possession of a URL would be enough to read a stranger's salary slip.
+
+### Known limitation: role freshness
+
+The JWT carries `{ sub, role }` for seven days, so a role changed in the database would
+not take effect until the token expires. This is acceptable here only because roles are
+seeded and the system has no role-change feature at all — there is no path that can
+produce a stale role. It is recorded as a limitation rather than presented as
+production-grade role management; a real system would either look the role up per
+request or keep token lifetimes short with rotation.
+
 ---
 
 ## 10. REST API
@@ -380,7 +461,7 @@ error — validation, BRE, 401, 403, 409 — is handled through a single path.
 | POST | `/api/application/salary-slip` | BORROWER | multipart `file` → `{salarySlip}` | 201, 413, 415 |
 | POST | `/api/loans` | BORROWER | `{amount,tenureDays}` → `{loan}` | 201, 409, 422 |
 | GET | `/api/loans/me` | BORROWER | → `{loans[]}` | 200 |
-| GET | `/api/loans/:id` | owner or module role | → `{loan, payments[]}` | 200, 403, 404 |
+| GET | `/api/loans/:id` | see §9 visibility rule | → `{loan, payments[]}` | 200, 403, 404 |
 | GET | `/api/files/salary-slip/:userId` | owner or exec | → stream | 200, 403, 404 |
 | GET | `/api/sales/leads` | SALES | → `{leads[]}` | 200, 403 |
 | GET | `/api/sanction/queue` | SANCTION | → `{loans[]}` | 200, 403 |
@@ -477,6 +558,13 @@ Documentation is advisory; these fail the build.
 
 **Forbidden folder names** — `utils`, `helpers`, `misc`, `temp`. These always become
 dumping grounds; banning the name is the cheapest prevention.
+
+**Escape hatch.** These rules are written once in step 1 and then cost nothing. If one
+of them starts causing friction during implementation, the rule is relaxed — the code
+is never contorted to satisfy it. Guardrails exist to keep the project clean; the
+moment they become the project, they have failed. Any rule that gets relaxed is
+recorded here with the reason, so the change is a decision rather than a quiet
+erosion.
 
 ---
 
