@@ -1,4 +1,4 @@
-import type { BreFailure, EmploymentMode, LoanStatus, Role } from "@lms/domain";
+import type { BreFailure, EmploymentMode, LeadStage, LoanStatus, Role } from "@lms/domain";
 
 /**
  * The shapes the API actually sends. Money is in rupees here, matching the
@@ -61,6 +61,16 @@ export type PaymentResponse = {
   utr: string;
   amount: number;
   paidAt: string;
+};
+
+export type LeadResponse = {
+  id: string;
+  fullName: string;
+  email: string;
+  pan: string | null;
+  registeredAt: string | null;
+  stage: LeadStage;
+  hasActiveLoan: boolean;
 };
 
 export type ApplicationResponse = {

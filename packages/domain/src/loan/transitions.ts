@@ -3,8 +3,11 @@ import type { Role } from "../rbac/roles";
 export const LOAN_STATUSES = ["APPLIED", "SANCTIONED", "DISBURSED", "CLOSED", "REJECTED"] as const;
 export type LoanStatus = (typeof LOAN_STATUSES)[number];
 
-/** A loan is a borrower's open obligation while in one of these. */
-export const ACTIVE_LOAN_STATUSES = ["APPLIED", "SANCTIONED", "DISBURSED"] as const;
+/**
+ * A loan is a borrower's open obligation while in one of these. Typed as the
+ * full union so membership checks do not narrow their argument away.
+ */
+export const ACTIVE_LOAN_STATUSES: readonly LoanStatus[] = ["APPLIED", "SANCTIONED", "DISBURSED"];
 
 /**
  * The whole lifecycle and its permissions in one table. `satisfies` keeps it

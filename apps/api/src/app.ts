@@ -6,8 +6,12 @@ import { env } from "./lib/env";
 import { errorHandler, notFound } from "./middleware/error";
 import { applicationRoutes } from "./modules/application/routes";
 import { authRoutes } from "./modules/auth/routes";
+import { collectionRoutes } from "./modules/collection/routes";
+import { disbursementRoutes } from "./modules/disbursement/routes";
 import { fileRoutes } from "./modules/files/routes";
 import { loanRoutes } from "./modules/loan/routes";
+import { salesRoutes } from "./modules/sales/routes";
+import { sanctionRoutes } from "./modules/sanction/routes";
 
 export function createApp(): Express {
   const app = express();
@@ -24,6 +28,11 @@ export function createApp(): Express {
   app.use("/api/application", applicationRoutes);
   app.use("/api/loans", loanRoutes);
   app.use("/api/files", fileRoutes);
+
+  app.use("/api/sales", salesRoutes);
+  app.use("/api/sanction", sanctionRoutes);
+  app.use("/api/disbursement", disbursementRoutes);
+  app.use("/api/collection", collectionRoutes);
 
   app.use(notFound);
   app.use(errorHandler);
