@@ -4,7 +4,7 @@ import { BorrowerProfile } from "../models/borrower-profile";
 import { Loan } from "../models/loan";
 import { Payment } from "../models/payment";
 import { User } from "../models/user";
-import { hashPassword } from "../modules/auth/auth.service";
+import { hashPassword } from "../modules/auth/service";
 import { SEED_ACCOUNTS, SEED_PASSWORD } from "./accounts";
 
 const MODELS = [User, BorrowerProfile, Loan, Payment];

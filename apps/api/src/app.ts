@@ -4,7 +4,7 @@ import cors from "cors";
 import express, { type Express } from "express";
 import { env } from "./lib/env";
 import { errorHandler, notFound } from "./middleware/error";
-import { authRoutes } from "./modules/auth/auth.routes";
+import { authRoutes } from "./modules/auth/routes";
 
 export function createApp(): Express {
   const app = express();

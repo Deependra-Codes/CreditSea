@@ -2,7 +2,7 @@ import { loginSchema, registerSchema } from "@lms/contracts";
 import { Router } from "express";
 import { authenticate } from "../../middleware/authenticate";
 import { validate } from "../../middleware/validate";
-import { login, logout, me, register } from "./auth.controller";
+import { login, logout, me, register } from "./controller";
 
 export const authRoutes = Router();
 

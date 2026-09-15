@@ -1,7 +1,9 @@
-# Loan Management System — Design Spec
+# Architecture
 
-Date: 2026-09-15
-Status: approved for implementation
+The design decisions behind this Loan Management System: data model, REST contract,
+role-based access, the loan lifecycle, and how money is represented.
+
+Implementation plans live in [`plans/`](./plans).
 
 ---
 

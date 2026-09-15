@@ -5,7 +5,7 @@ import { HttpError } from "../../lib/http-error";
 import { AUTH_COOKIE } from "../../middleware/authenticate";
 import { validated } from "../../middleware/validate";
 import { User } from "../../models/user";
-import { TOKEN_TTL_SECONDS, hashPassword, signToken, verifyPassword } from "./auth.service";
+import { TOKEN_TTL_SECONDS, hashPassword, signToken, verifyPassword } from "./service";
 
 // Mongoose infers role as the exact Role union from `enum: ROLES`, so no cast.
 const toPublicUser = (user: InstanceType<typeof User>): PublicUser => ({

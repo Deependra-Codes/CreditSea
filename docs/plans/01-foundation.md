@@ -8,7 +8,7 @@
 
 **Tech Stack:** pnpm workspaces · TypeScript 5.9 (strict) · vitest · Express 5 · Mongoose 8 · MongoDB Atlas · zod 4 · jsonwebtoken · bcryptjs · Biome · dependency-cruiser
 
-**Spec:** `docs/specs/2026-09-15-lms-design.md`
+**Spec:** `docs/architecture.md`
 
 ## Global Constraints
 
@@ -1568,7 +1568,7 @@ git commit -m "feat(api): add Express 5 skeleton, validated env, and Mongoose mo
 ### Task 8: Auth and RBAC middleware
 
 **Files:**
-- Create: `apps/api/src/modules/auth/auth.service.ts`, `auth.controller.ts`, `auth.routes.ts`
+- Create: `apps/api/src/modules/auth/service.ts`, `controller.ts`, `routes.ts`
 - Create: `apps/api/src/middleware/authenticate.ts`, `apps/api/src/middleware/authorize.ts`
 - Modify: `apps/api/src/app.ts`
 - Test: `apps/api/src/middleware/authorize.test.ts`
@@ -1696,7 +1696,7 @@ Expected: PASS — 4 tests.
 
 - [ ] **Step 5: Implement the auth service**
 
-`apps/api/src/modules/auth/auth.service.ts`:
+`apps/api/src/modules/auth/service.ts`:
 
 ```ts
 import type { Role } from "@lms/domain";
@@ -1716,7 +1716,7 @@ export const signToken = (payload: { sub: string; role: Role }) =>
 
 - [ ] **Step 6: Implement the controller and routes**
 
-`apps/api/src/modules/auth/auth.controller.ts`:
+`apps/api/src/modules/auth/controller.ts`:
 
 ```ts
 import { type LoginInput, type RegisterInput, ok } from "@lms/contracts";
@@ -1725,7 +1725,7 @@ import { HttpError } from "../../lib/http-error";
 import { AUTH_COOKIE } from "../../middleware/authenticate";
 import { validated } from "../../middleware/validate";
 import { User } from "../../models/user";
-import { TOKEN_TTL_SECONDS, hashPassword, signToken, verifyPassword } from "./auth.service";
+import { TOKEN_TTL_SECONDS, hashPassword, signToken, verifyPassword } from "./service";
 
 const setAuthCookie = (res: Response, token: string) =>
   res.cookie(AUTH_COOKIE, token, {
@@ -1781,14 +1781,14 @@ export async function me(req: Request, res: Response) {
 }
 ```
 
-`apps/api/src/modules/auth/auth.routes.ts`:
+`apps/api/src/modules/auth/routes.ts`:
 
 ```ts
 import { loginSchema, registerSchema } from "@lms/contracts";
 import { Router } from "express";
 import { authenticate } from "../../middleware/authenticate";
 import { validate } from "../../middleware/validate";
-import { login, logout, me, register } from "./auth.controller";
+import { login, logout, me, register } from "./controller";
 
 export const authRoutes = Router();
 
@@ -1803,7 +1803,7 @@ authRoutes.get("/me", authenticate, me);
 In `apps/api/src/app.ts`, add the import and mount it above `notFound`:
 
 ```ts
-import { authRoutes } from "./modules/auth/auth.routes";
+import { authRoutes } from "./modules/auth/routes";
 // ...
 app.use("/api/auth", authRoutes);
 ```
@@ -1870,7 +1870,7 @@ export const SEED_ACCOUNTS: ReadonlyArray<{ fullName: string; email: string; rol
 import mongoose from "mongoose";
 import { connectDb } from "../lib/db";
 import { env } from "../lib/env";
-import { hashPassword } from "../modules/auth/auth.service";
+import { hashPassword } from "../modules/auth/service";
 import { User } from "../models/user";
 import { SEED_ACCOUNTS, SEED_PASSWORD } from "./accounts";
 
