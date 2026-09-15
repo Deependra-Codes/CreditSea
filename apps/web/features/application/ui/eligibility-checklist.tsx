@@ -23,7 +23,7 @@ export function EligibilityChecklist({
           <li
             key={rule.code}
             className={[
-              "grid grid-cols-[20px_minmax(0,1fr)_auto] items-center gap-3 rounded-ctrl px-3 py-2.5",
+              "grid grid-cols-[18px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-ctrl px-3 py-2",
               "transition-[box-shadow,background-color] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
               state === "fail"
                 ? "bg-critical/5 ring-1 ring-critical/30"
@@ -32,7 +32,7 @@ export function EligibilityChecklist({
           >
             <span
               className={[
-                "grid size-5 place-items-center rounded-full text-canvas transition-colors duration-200",
+                "grid size-[18px] place-items-center rounded-full text-canvas transition-colors duration-200",
                 state === "pass" ? "bg-good" : "",
                 state === "fail" ? "bg-critical" : "",
                 state === "pending" ? "bg-transparent ring-2 ring-line ring-inset" : "",
@@ -43,7 +43,7 @@ export function EligibilityChecklist({
               {state === "fail" && <X className="size-3 stroke-[3]" />}
             </span>
 
-            <span className={`text-sm ${state === "pending" ? "text-ink-3" : ""}`}>
+            <span className={`text-[13px] ${state === "pending" ? "text-ink-3" : ""}`}>
               {rule.message}
             </span>
 

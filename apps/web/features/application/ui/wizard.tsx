@@ -6,6 +6,7 @@ import { type WizardStep, currentStep } from "../model/step";
 import { EligibilityForm } from "./eligibility-form";
 import { LoanConfigurator } from "./loan-configurator";
 import { SlipUpload } from "./slip-upload";
+import { WizardAside } from "./wizard-aside";
 import { WizardSteps } from "./wizard-steps";
 
 const HEADING: Record<WizardStep, { title: string; blurb: string }> = {
@@ -48,18 +49,22 @@ export function Wizard({ initial }: { initial: ApplicationResponse }) {
       </div>
 
       <div
-        className="enter rounded-card bg-canvas p-5 ring-1 ring-line sm:p-6"
+        className="enter grid gap-5 lg:grid-cols-[minmax(0,1fr)_17rem]"
         style={{ animationDelay: "120ms" }}
       >
-        {step === 2 && (
-          <EligibilityForm
-            profile={application.profile}
-            serverBre={application.profile?.bre ?? null}
-            onPassed={withProfile}
-          />
-        )}
-        {step === 3 && <SlipUpload onUploaded={withSlip} />}
-        {step === 4 && <LoanConfigurator />}
+        <div className="rounded-card bg-canvas p-5 ring-1 ring-line sm:p-6">
+          {step === 2 && (
+            <EligibilityForm
+              profile={application.profile}
+              serverBre={application.profile?.bre ?? null}
+              onPassed={withProfile}
+            />
+          )}
+          {step === 3 && <SlipUpload onUploaded={withSlip} />}
+          {step === 4 && <LoanConfigurator />}
+        </div>
+
+        <WizardAside current={step} profile={application.profile} />
       </div>
     </div>
   );
