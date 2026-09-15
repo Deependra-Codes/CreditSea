@@ -2,6 +2,7 @@
 
 import { LiveLoanCard } from "@/components/live-loan-card";
 import { MeshBackdrop } from "@/components/mesh-backdrop";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { BadgeIndianRupee, CalendarRange, Percent } from "lucide-react";
 import { useState } from "react";
 import { LoginForm } from "./login-form";
@@ -52,12 +53,16 @@ export function AuthScreen({ initialMode }: { initialMode: AuthMode }) {
 
   return (
     <div className="relative min-h-dvh lg:grid lg:grid-cols-2">
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
+
       {/* ── the product half ── */}
       <aside
         className={[
           "relative hidden overflow-hidden bg-canvas",
           "lg:flex lg:flex-col lg:justify-center lg:gap-7 lg:p-12 lg:pb-10",
-          "transition-transform duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+          "transition-transform duration-[820ms] ease-(--ease-swap) will-change-transform",
           registering ? "lg:translate-x-full" : "lg:translate-x-0",
         ].join(" ")}
       >
@@ -96,12 +101,16 @@ export function AuthScreen({ initialMode }: { initialMode: AuthMode }) {
       <main
         className={[
           "flex items-center justify-center px-5 py-12",
-          "transition-transform duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+          "relative transition-transform duration-[820ms] ease-(--ease-swap) will-change-transform",
           registering ? "lg:-translate-x-full" : "lg:translate-x-0",
         ].join(" ")}
       >
         {/* keyed on mode, so the contents cross-fade while the halves slide */}
-        <div key={mode} className="enter flex w-full max-w-sm flex-col gap-6">
+        <div
+          key={mode}
+          className="enter flex w-full max-w-sm flex-col gap-6"
+          style={{ animationDelay: "220ms" }}
+        >
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-bold uppercase tracking-[0.12em] text-accent lg:hidden">
               Lending Portal

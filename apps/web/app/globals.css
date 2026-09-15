@@ -40,6 +40,9 @@
   --radius-ctrl: 0.375rem;
 
   --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* Symmetric: both halves accelerate and settle together, so they read as
+     one gesture rather than two things arriving. */
+  --ease-swap: cubic-bezier(0.76, 0, 0.24, 1);
 }
 
 /*
@@ -230,4 +233,24 @@ p {
   .mesh-drift {
     animation: none !important;
   }
+}
+
+/* ─── Theme wipe ──────────────────────────────────────────────────────────
+   The default cross-fade is replaced: the outgoing theme holds perfectly
+   still underneath while the incoming one is clipped in as a circle growing
+   from the control that was clicked. The clip itself is driven from JS,
+   because only JS knows where the pointer was. */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
 }
