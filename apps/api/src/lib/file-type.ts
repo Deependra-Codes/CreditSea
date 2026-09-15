@@ -51,7 +51,9 @@ export function assertUploadAllowed(file: {
     throw new HttpError(415, "UNSUPPORTED_FILE", "Upload a PDF, JPG or PNG file.");
   }
 
-  const spec = ALLOWED_UPLOADS[detected];
+  // Widened: indexing the const map yields a union whose tuple members do not
+  // overlap, which narrows includes() to never.
+  const spec: UploadSpec = ALLOWED_UPLOADS[detected];
   const extension = path.extname(file.originalname).toLowerCase();
 
   // Content, extension and declared type must all agree.

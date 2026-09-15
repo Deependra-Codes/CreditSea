@@ -32,7 +32,9 @@ describe("canViewLoan", () => {
 
   it("refuses an executive whose queue the loan is not in", () => {
     expect(canViewLoan({ id: "e", role: "DISBURSEMENT" }, loan({ status: "APPLIED" }))).toBe(false);
-    expect(canViewLoan({ id: "e", role: "COLLECTION" }, loan({ status: "SANCTIONED" }))).toBe(false);
+    expect(canViewLoan({ id: "e", role: "COLLECTION" }, loan({ status: "SANCTIONED" }))).toBe(
+      false,
+    );
   });
 
   // An executive keeps sight of a loan they moved.
