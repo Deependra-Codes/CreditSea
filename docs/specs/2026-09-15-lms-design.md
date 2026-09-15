@@ -32,7 +32,7 @@ in the README.
 | How is age computed? | From DOB to evaluation date, accounting for month and day | Year subtraction is wrong for ~half of each cohort |
 | Which PAN regex is enforced? | `^[A-Z]{5}[0-9]{4}[A-Z]$` | See §5.2 — the stricter entity-type variant is implemented and tested but not enforced |
 | Can a BRE-rejected borrower retry? | Yes. The *application* is blocked, not the account | The demo must show both a BRE pass and a BRE fail |
-| Can a borrower hold more than one loan? | One active loan at a time. A new application is allowed once the previous loan is `CLOSED` or `REJECTED` | Keeps the Sales lead query and the portal state unambiguous |
+| Can a borrower hold more than one loan? | One active loan at a time, enforced by a partial unique index (§6). A new application is allowed once the previous loan is `CLOSED` or `REJECTED` | Keeps the Sales lead query and the portal state unambiguous; a business invariant belongs where it cannot be raced |
 | Where does the JWT live? | `httpOnly` cookie | Next middleware can read cookies but not `localStorage`; without it, frontend RBAC is cosmetic |
 | Unauthorized status code | `401` unauthenticated, `403` authenticated but wrong role | These are different failures and the client reacts differently |
 
@@ -63,7 +63,8 @@ lms/
 │   └── src/
 │       ├── models/              mongoose schemas
 │       ├── modules/             auth · application · sales · sanction ·
-│       │                        disbursement · collection · loan
+│       │                        disbursement · collection
+│       ├── workflows/           shared orchestration: transition · record-payment
 │       ├── middleware/          authenticate · authorize · validate · upload · error
 │       ├── lib/                 env · db · async-handler · http-error
 │       └── seed/
@@ -222,6 +223,7 @@ Indexes: `{ userId: 1 }` unique, `{ pan: 1 }` unique.
 | Field | Type | Notes |
 |---|---|---|
 | `borrowerId` | ObjectId → users | |
+| `activeBorrowerId` | ObjectId → users, present only while active | see below |
 | `snapshot` | `{ fullName, pan, dateOfBirth, monthlySalaryPaise, employmentMode }` | frozen at apply time |
 | `principalPaise` | int | 5_000_000 … 50_000_000 |
 | `tenureDays` | int | 30 … 365 |
@@ -239,7 +241,24 @@ same fact can drift; the history is the source of truth and the UI reads the las
 entry.
 
 Indexes: `{ borrowerId: 1 }`, `{ status: 1, appliedAt: -1 }` — every dashboard module
-queries by status.
+queries by status — plus a **partial unique index** on `activeBorrowerId`.
+
+**One active loan per borrower is a database guarantee, not an application check.**
+`activeBorrowerId` holds the borrower's id while the loan is live and is `$unset` on
+`CLOSED` or `REJECTED`:
+
+```js
+loanSchema.index(
+  { activeBorrowerId: 1 },
+  { unique: true, partialFilterExpression: { activeBorrowerId: { $exists: true } } },
+);
+```
+
+The obvious implementation — `findOne({ borrowerId, status: { $in: ACTIVE } })` and then
+`create` — lets two concurrent applications both pass the check. This is a business
+invariant, so it belongs where it cannot be raced. `$exists` is used rather than a
+status `$in` because `partialFilterExpression` accepts only a restricted operator set.
+The field is never written as `null`, since the index keys off presence.
 
 **Why `snapshot`.** The loan was assessed against the borrower's details *at the time
 of application*. If the borrower later edits their salary, the sanctioned loan's basis
@@ -288,7 +307,7 @@ export function checkTransition(from, to, role):
   | { ok: false; reason: "INVALID_TRANSITION" | "FORBIDDEN_ROLE" };
 ```
 
-**Single write point.** `apps/api/src/modules/loan/transition.service.ts` is the only
+**Single write point.** `apps/api/src/workflows/transition.service.ts` is the only
 file in the codebase that writes `loan.status`. Sanction, Disbursement and Collection
 all call it. It applies the guard, appends to `statusHistory`, and stamps the matching
 timestamp.
@@ -352,6 +371,26 @@ Atlas M0 is a three-node replica set, so `session.withTransaction()` is availabl
 with mongoose it costs a handful of lines. Payment insert, outstanding decrement, and
 any resulting `CLOSED` transition commit together or not at all. In a lending system,
 money that disagrees with its audit trail is the worst failure available.
+
+**Every operation inside must receive the same session, including the transition.**
+Mongoose does not propagate a session implicitly: a query that does not carry
+`{ session }` runs outside the transaction and commits on its own. So
+`transitionLoan` takes the session as a required parameter rather than an optional
+one — an optional session is a session someone will forget to pass, producing a
+transaction that silently covers two of its three writes.
+
+```ts
+await session.withTransaction(async () => {
+  await Payment.create([payment], { session });          // array form is required with a session
+  const loan = await Loan.findOneAndUpdate(filter, update, { session, new: true });
+  if (loan?.outstandingPaise === 0) {
+    await transitionLoan({ ...args, to: "CLOSED", session });
+  }
+});
+```
+
+`Payment.create` must use its array form when given a session; the single-document
+form ignores the options argument.
 
 ---
 

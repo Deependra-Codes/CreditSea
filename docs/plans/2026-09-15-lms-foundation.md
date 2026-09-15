@@ -228,7 +228,31 @@ describe("formatPaise", () => {
     expect(formatPaise(rupeesToPaise(500_000))).toBe("₹5,00,000.00");
   });
 });
+
+describe("rupeesToPaise guards", () => {
+  // This function is exported and callable directly, so its behaviour must be
+  // defined here rather than relying on the contract layer's finite/positive checks.
+  it("rounds beyond two decimal places to the nearest paisa", () => {
+    expect(rupeesToPaise(1.2345)).toBe(123);
+    expect(rupeesToPaise(1.2355)).toBe(124);
+  });
+
+  it("handles negative amounts symmetrically", () => {
+    expect(rupeesToPaise(-493.15)).toBe(-49_315);
+  });
+
+  it("throws on non-finite input", () => {
+    expect(() => rupeesToPaise(Number.NaN)).toThrow(/finite/i);
+    expect(() => rupeesToPaise(Number.POSITIVE_INFINITY)).toThrow(/finite/i);
+  });
+
+  it("throws when the result would leave safe integer range", () => {
+    expect(() => rupeesToPaise(1e15)).toThrow(/range/i);
+  });
+});
 ```
+
+Negative values are allowed rather than rejected: this is a unit converter, and imposing a domain rule here would duplicate the `positive()` check the contract layer already owns. Non-finite input and unsafe results are different — they produce silent `NaN` or precision loss, so they throw.
 
 The `0.1 + 0.2` case is deliberate: it equals `0.30000000000000004`, and a naive `Math.round(r * 100)` must still yield `30`.
 
@@ -258,7 +282,14 @@ export type Paise = number & { readonly __brand: "Paise" };
  * a few decimal places first removes the representation error before rounding.
  */
 export function rupeesToPaise(rupees: number): Paise {
-  return Math.round(Number((rupees * 100).toFixed(4))) as Paise;
+  if (!Number.isFinite(rupees)) {
+    throw new RangeError("Amount must be a finite number.");
+  }
+  const paise = Math.round(Number((rupees * 100).toFixed(4)));
+  if (!Number.isSafeInteger(paise)) {
+    throw new RangeError("Amount is outside the safe integer range.");
+  }
+  return paise as Paise;
 }
 
 export function paiseToRupees(p: Paise): number {
@@ -1334,6 +1365,11 @@ const statusEventSchema = new Schema(
 const loanSchema = new Schema(
   {
     borrowerId: { type: Types.ObjectId, ref: "User", required: true, index: true },
+    // Set to borrowerId while the loan is active; $unset on CLOSED or REJECTED.
+    // The partial unique index below turns "one active loan per borrower" into a
+    // database guarantee — a findOne check would let two concurrent applications
+    // through. Never store null here: the index keys off $exists.
+    activeBorrowerId: { type: Types.ObjectId, ref: "User" },
     snapshot: {
       fullName: String,
       pan: String,
@@ -1359,6 +1395,14 @@ const loanSchema = new Schema(
 
 // Every dashboard module queries by status, newest first.
 loanSchema.index({ status: 1, appliedAt: -1 });
+
+// At most one active loan per borrower, enforced by the database.
+// $exists is used rather than a status $in because partialFilterExpression
+// supports only a restricted operator set; $exists is supported everywhere.
+loanSchema.index(
+  { activeBorrowerId: 1 },
+  { unique: true, partialFilterExpression: { activeBorrowerId: { $exists: true } } },
+);
 
 export type LoanDoc = InferSchemaType<typeof loanSchema>;
 export const Loan = model("Loan", loanSchema);
@@ -1925,10 +1969,19 @@ module.exports = {
     },
     {
       name: "api-modules-cannot-cross-import",
-      comment: "Sibling modules must share through domain, models, or lib — never each other.",
+      comment:
+        "Sibling modules share through workflows, models, lib or domain — never each other. " +
+        "Shared orchestration (loan transitions, payment recording) belongs in workflows/.",
       severity: "error",
       from: { path: "^apps/api/src/modules/([^/]+)/" },
       to: { path: "^apps/api/src/modules/(?!$1/)[^/]+/" },
+    },
+    {
+      name: "workflows-cannot-import-modules",
+      comment: "Workflows are imported by modules, never the reverse.",
+      severity: "error",
+      from: { path: "^apps/api/src/workflows" },
+      to: { path: "^apps/api/src/modules" },
     },
     {
       name: "no-orphan-dumping-grounds",
@@ -1945,6 +1998,14 @@ module.exports = {
   },
 };
 ```
+
+**Why `workflows/` exists.** Without it, `api-modules-cannot-cross-import` would block `modules/sanction` from importing the loan transition service — the exact call the architecture requires. Shared business orchestration needs a deliberate home, or developers start bypassing the boundary and the rule quietly becomes decorative. The layering is:
+
+```
+modules/ → workflows/ → models/ + lib/ + @lms/domain
+```
+
+`workflows/` lands in Plan 3 alongside `transition.service.ts` and `record-payment.ts`. The rule is written now so the folder arrives into a boundary that already expects it.
 
 The web-specific rules (`app/` may import only `features/*/public`, `ui` may not import server code) are added in Plan 3, when those folders exist. A rule pointing at a folder that does not exist yet reports nothing and creates false confidence.
 
