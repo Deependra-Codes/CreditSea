@@ -28,13 +28,16 @@ export function LifecycleRail({ status }: { status: LoanStatus }) {
         <li key={stage.status} className="contents">
           {index > 0 && (
             <span
-              className={`h-0.5 min-w-3.5 flex-auto transition-colors duration-300 ${
+              className={`h-0.5 min-w-2 flex-auto transition-colors duration-300 sm:min-w-3.5 ${
                 index <= reached ? "bg-stage-2" : "bg-line"
               }`}
               aria-hidden="true"
             />
           )}
-          <div className="flex w-25 shrink-0 flex-col items-center gap-1.5">
+          {/* 20 is the narrowest that still holds "SANCTIONED" on one line, so
+              all four stages fit a phone. The scroll below is the fallback for
+              the very narrowest, not the normal case. */}
+          <div className="flex w-20 shrink-0 flex-col items-center gap-1.5 sm:w-25">
             <span
               className={[
                 "size-3.5 rounded-full transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]",

@@ -62,7 +62,11 @@ export function DemoAccounts({
                 >
                   {account.role}
                 </span>
-                <span className={`font-mono ${active ? "text-accent" : "text-ink-3"}`}>
+                {/* The longest address only just clears a 400px screen, so it
+                    truncates rather than pushing the row wider. */}
+                <span
+                  className={`min-w-0 truncate font-mono ${active ? "text-accent" : "text-ink-3"}`}
+                >
                   {account.email}
                 </span>
                 <span className="ml-auto hidden sm:inline">{account.does}</span>
