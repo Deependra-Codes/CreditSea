@@ -4,6 +4,7 @@ import cors from "cors";
 import express, { type Express } from "express";
 import { env } from "./lib/env";
 import { errorHandler, notFound } from "./middleware/error";
+import { requestLog } from "./middleware/log";
 import { applicationRoutes } from "./modules/application/routes";
 import { authRoutes } from "./modules/auth/routes";
 import { collectionRoutes } from "./modules/collection/routes";
@@ -17,6 +18,7 @@ import { sanctionRoutes } from "./modules/sanction/routes";
 export function createApp(): Express {
   const app = express();
 
+  app.use(requestLog);
   app.use(cors({ origin: env.WEB_ORIGIN, credentials: true }));
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser());
