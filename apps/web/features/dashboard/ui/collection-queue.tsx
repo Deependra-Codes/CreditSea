@@ -4,38 +4,31 @@ import { Button } from "@/components/button";
 import { Field, inputClass } from "@/components/field";
 import { Money } from "@/components/money";
 import { type Column, QueueShell } from "@/components/queue-shell";
-import { ApiClientError, api, toFieldErrors } from "@/lib/api";
+import { api } from "@/lib/api";
 import type { LoanResponse } from "@lms/contracts";
 import { rupeesToPaise } from "@lms/domain";
 import { Wallet } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useQueueAction } from "../model/use-queue-action";
 import { loanColumns } from "./loan-columns";
 import { LoanDetail } from "./loan-detail";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
 function PaymentForm({ loan }: { loan: LoanResponse }) {
-  const router = useRouter();
+  const { run, busy, error, fieldErrors } = useQueueAction();
   const [utr, setUtr] = useState("");
   const [amount, setAmount] = useState(String(loan.outstanding));
   const [paidAt, setPaidAt] = useState(today());
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const entered = Number(amount);
   const settles = entered === loan.outstanding;
   const overpays = entered > loan.outstanding;
 
-  async function record(event: React.FormEvent) {
+  const record = (event: React.FormEvent) => {
     event.preventDefault();
-    setPending(true);
-    setError(null);
-    setFieldErrors({});
-
-    try {
+    return run(async () => {
       await api(`/api/collection/${loan.id}/payments`, {
         method: "POST",
         body: JSON.stringify({ utr, amount: entered, paidAt }),
@@ -43,17 +36,8 @@ function PaymentForm({ loan }: { loan: LoanResponse }) {
       toast.success(settles ? "Loan settled and closed" : "Payment recorded", {
         description: `UTR ${utr} · ₹${entered.toLocaleString("en-IN")}`,
       });
-      router.refresh();
-    } catch (caught) {
-      if (caught instanceof ApiClientError) {
-        setError(caught.message);
-        if (caught.code === "VALIDATION_FAILED") setFieldErrors(toFieldErrors(caught.details));
-      } else {
-        setError("Could not reach the server.");
-      }
-      setPending(false);
-    }
-  }
+    });
+  };
 
   return (
     <form className="flex flex-col gap-3" onSubmit={record}>
@@ -114,8 +98,8 @@ function PaymentForm({ loan }: { loan: LoanResponse }) {
         </p>
       )}
 
-      <Button type="submit" disabled={pending || overpays} className="self-start">
-        {pending ? "Recording…" : settles ? "Record final payment" : "Record payment"}
+      <Button type="submit" disabled={busy || overpays} className="self-start">
+        {busy ? "Recording…" : settles ? "Record final payment" : "Record payment"}
       </Button>
     </form>
   );
@@ -152,7 +136,10 @@ export function CollectionQueue({ loans }: { loans: LoanResponse[] }) {
       }}
       renderDetail={(loan) => (
         <LoanDetail loan={loan}>
-          <PaymentForm loan={loan} />
+          {/* Keyed on the balance: once a payment lands this form is about a
+              different amount, so it starts fresh rather than holding a spent
+              UTR and the old outstanding. */}
+          <PaymentForm key={loan.outstanding} loan={loan} />
         </LoanDetail>
       )}
     />

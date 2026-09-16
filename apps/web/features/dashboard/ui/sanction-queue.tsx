@@ -2,25 +2,26 @@
 
 import { Button } from "@/components/button";
 import { QueueShell } from "@/components/queue-shell";
-import { ApiClientError, api } from "@/lib/api";
+import { api } from "@/lib/api";
 import type { LoanResponse } from "@lms/contracts";
 import { FileCheck2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useQueueAction } from "../model/use-queue-action";
 import { loanColumns, waitingTiles } from "./loan-columns";
 import { LoanDetail } from "./loan-detail";
 
-function Decision({ loan }: { loan: LoanResponse }) {
-  const router = useRouter();
-  const [reason, setReason] = useState("");
-  const [pending, setPending] = useState<"APPROVE" | "REJECT" | null>(null);
-  const [error, setError] = useState<string | null>(null);
+type Decisions = "APPROVE" | "REJECT";
 
-  async function decide(decision: "APPROVE" | "REJECT") {
-    setPending(decision);
-    setError(null);
-    try {
+function Decision({ loan }: { loan: LoanResponse }) {
+  const { run, busy, error } = useQueueAction();
+  const [reason, setReason] = useState("");
+  // Which button is busy stays local — the hook only knows that something is.
+  const [chosen, setChosen] = useState<Decisions | null>(null);
+
+  const decide = (decision: Decisions) => {
+    setChosen(decision);
+    return run(async () => {
       await api(`/api/sanction/${loan.id}/decide`, {
         method: "POST",
         body: JSON.stringify(decision === "REJECT" ? { decision, reason } : { decision }),
@@ -28,12 +29,8 @@ function Decision({ loan }: { loan: LoanResponse }) {
       toast.success(decision === "APPROVE" ? "Loan sanctioned" : "Loan rejected", {
         description: `${loan.applicantName} · ${loan.pan}`,
       });
-      router.refresh();
-    } catch (caught) {
-      setError(caught instanceof ApiClientError ? caught.message : "Could not reach the server.");
-      setPending(null);
-    }
-  }
+    });
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -57,16 +54,16 @@ function Decision({ loan }: { loan: LoanResponse }) {
       )}
 
       <div className="flex flex-wrap gap-2">
-        <Button type="button" disabled={pending !== null} onClick={() => void decide("APPROVE")}>
-          {pending === "APPROVE" ? "Approving…" : "Approve loan"}
+        <Button type="button" disabled={busy} onClick={() => void decide("APPROVE")}>
+          {busy && chosen === "APPROVE" ? "Approving…" : "Approve loan"}
         </Button>
         <Button
           type="button"
           variant="ghost"
-          disabled={pending !== null || reason.trim().length < 3}
+          disabled={busy || reason.trim().length < 3}
           onClick={() => void decide("REJECT")}
         >
-          {pending === "REJECT" ? "Rejecting…" : "Reject with reason"}
+          {busy && chosen === "REJECT" ? "Rejecting…" : "Reject with reason"}
         </Button>
       </div>
     </div>

@@ -2,32 +2,22 @@
 
 import { Button } from "@/components/button";
 import { QueueShell } from "@/components/queue-shell";
-import { ApiClientError, api } from "@/lib/api";
+import { api } from "@/lib/api";
 import type { LoanResponse } from "@lms/contracts";
 import { Banknote } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { toast } from "sonner";
+import { useQueueAction } from "../model/use-queue-action";
 import { loanColumns, waitingTiles } from "./loan-columns";
 import { LoanDetail } from "./loan-detail";
 
 function Release({ loan }: { loan: LoanResponse }) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { run, busy, error } = useQueueAction();
 
-  async function release() {
-    setPending(true);
-    setError(null);
-    try {
+  const release = () =>
+    run(async () => {
       await api(`/api/disbursement/${loan.id}/release`, { method: "POST" });
       toast.success("Funds released", { description: `${loan.applicantName} · ${loan.pan}` });
-      router.refresh();
-    } catch (caught) {
-      setError(caught instanceof ApiClientError ? caught.message : "Could not reach the server.");
-      setPending(false);
-    }
-  }
+    });
 
   return (
     <div className="flex flex-col gap-3">
@@ -41,13 +31,8 @@ function Release({ loan }: { loan: LoanResponse }) {
         </p>
       )}
 
-      <Button
-        type="button"
-        disabled={pending}
-        onClick={() => void release()}
-        className="self-start"
-      >
-        {pending ? "Releasing…" : "Mark as disbursed"}
+      <Button type="button" disabled={busy} onClick={() => void release()} className="self-start">
+        {busy ? "Releasing…" : "Mark as disbursed"}
       </Button>
     </div>
   );
