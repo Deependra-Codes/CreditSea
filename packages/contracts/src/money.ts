@@ -11,8 +11,8 @@ import { z } from "zod";
 export const rupeeAmount = (minPaise: Paise, maxPaise: Paise) =>
   z
     .number()
-    .finite()
-    .positive()
+    .finite("Enter a valid amount.")
+    .positive("Enter an amount greater than zero.")
     .transform((rupees, ctx) => {
       try {
         return rupeesToPaise(rupees);
