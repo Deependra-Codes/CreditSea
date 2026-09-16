@@ -28,25 +28,25 @@ Step 2. Enter:
 | Monthly salary | `9000` |
 | Employment | `Unemployed` |
 
-Click **Check eligibility**.
+Do not click anything. The rows settle as you type.
 
-> "Three rules fail — age, salary, employment — and all three are shown at once. The engine returns every failure rather than the first, so the applicant does not discover them across three submissions."
+> "Three rules fail — age, salary, employment — and all three go red at once. The engine reports every failure rather than the first, so nobody discovers them across three submissions."
 
-Point out that the details are still saved:
+Point at the button, which is shut:
 
-> "A rejection is a 200, not a 422. The request was fine and the profile persisted — which is what lets them correct it here rather than starting over."
+> "There is no *check* to press. The browser is running the same rule module the server treats as authority, so the rows are already the answer — and the only action on this screen stays closed until all four are green."
 
 ## 1:10 — Correcting it (30s)
 
 Change date of birth to `01/01/1995`, salary to `64000`, employment to `Salaried`. Watch the rows resolve as you type.
 
-> "The client runs the same rule module the server treats as authority. It is the same file — not a copy — so the two cannot drift."
+> "It is the same file, not a copy, so the browser and the server cannot drift apart."
 
-Note the button as the last row turns green:
-
-> "It stops saying *Check eligibility* once there is nothing left to check — the browser has already run the rules the server will. Now it just saves and moves on."
+Note the button opening as the last row turns green.
 
 Click **Continue to salary slip**. The step advances.
+
+> "The server re-runs all four on the write regardless. The browser check is a convenience; it is never the control."
 
 ## 1:40 — Upload, and a rejection (35s)
 

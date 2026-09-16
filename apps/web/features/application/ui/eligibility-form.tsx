@@ -96,12 +96,10 @@ export function EligibilityForm({
     ]),
   ) as Record<BreCode, RuleState>;
 
-  // With all four ticked there is nothing left to check — the browser has run
-  // the same rules the server will. Calling it a check then would be a lie: the
-  // button is saving the details and moving on, so it says so.
+  // There is no "check" to press: the rows above already ran the same rules the
+  // server will, and settle as you type. So the only action here is to move on,
+  // and it stays shut until all four are green — the rows are the explanation.
   const ready = verdict?.passed === true;
-  const label = ready ? "Continue to salary slip" : "Check eligibility";
-  const busyLabel = ready ? "Saving…" : "Checking…";
 
   const age =
     draft.dateOfBirth && !Number.isNaN(new Date(draft.dateOfBirth).getTime())
@@ -241,14 +239,17 @@ export function EligibilityForm({
         </p>
       )}
 
+      {/* Only reachable when the server disagreed with the browser, since the
+          button is shut otherwise. Still not an error: the details were saved. */}
       {bre && !bre.passed && (
         <output className="text-sm text-ink-2">
-          Your details are saved. Correct the rules above and check again — nothing is lost.
+          Your details are saved, but the server did not pass every rule. Correct the rows above to
+          continue — nothing is lost.
         </output>
       )}
 
-      <Button type="submit" disabled={pending} className="self-start">
-        {pending ? busyLabel : label}
+      <Button type="submit" disabled={pending || !ready} className="self-start">
+        {pending ? "Saving…" : "Continue to salary slip"}
       </Button>
     </form>
   );
