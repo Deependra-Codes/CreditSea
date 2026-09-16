@@ -11,9 +11,10 @@ const stamp = (theme: Theme) => document.documentElement.setAttribute("data-them
 
 /** Far enough to reach the corner furthest from the click, or the circle stops short. */
 const radiusToFurthestCorner = (x: number, y: number) =>
-  // 6% past the corner, so the circle has fully cleared before the animation
-  // ends rather than terminating at the exact moment it covers.
-  Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.06;
+  // Barely past the corner. At 6% the screen was covered by 45% of the runtime
+  // and the rest animated off-screen — invisible work that reads as a stall and
+  // drops frames for nothing.
+  Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.02;
 
 /**
  * One switch, not three choices. Light is the product's default and the OS
@@ -75,10 +76,11 @@ export function ThemeToggle() {
           ],
         },
         {
-          duration: 620,
-          // easeOutQuint: essentially arrived by the halfway point, so the tail
-          // is imperceptible and there is no hard stop to notice.
-          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          duration: 450,
+          // easeOutCubic. Quint rushed the first third and then crawled; this
+          // spreads the travel out, so the motion stays visible to the end
+          // without stopping dead.
+          easing: "cubic-bezier(0.33, 1, 0.68, 1)",
           pseudoElement: "::view-transition-new(root)",
         },
       );
