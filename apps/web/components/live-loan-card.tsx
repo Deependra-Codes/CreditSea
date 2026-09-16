@@ -4,6 +4,9 @@ import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const STEP_MS = 2000;
+/** The first move comes sooner: an interval's first tick is a whole step away,
+    and a card that holds perfectly still on arrival reads as broken. */
+const FIRST_STEP_MS = 700;
 /** Still travelling when the eye reaches it, but done well inside a step. */
 const FILL_MS = 650;
 
@@ -52,8 +55,19 @@ export function LiveLoanCard() {
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = setInterval(() => setIndex((value) => (value + 1) % STAGES.length), STEP_MS);
-    return () => clearInterval(id);
+
+    const advance = () => setIndex((value) => (value + 1) % STAGES.length);
+    let interval: number | undefined;
+
+    const lead = window.setTimeout(() => {
+      advance();
+      interval = window.setInterval(advance, STEP_MS);
+    }, FIRST_STEP_MS);
+
+    return () => {
+      window.clearTimeout(lead);
+      if (interval !== undefined) window.clearInterval(interval);
+    };
   }, []);
 
   const stage = STAGES[index] ?? STAGES[0];
