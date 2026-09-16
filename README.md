@@ -203,7 +203,7 @@ Each of these is a decision, not an oversight.
 ## Testing
 
 ```bash
-pnpm test        # 77 tests
+pnpm test        # 96 tests
 pnpm typecheck   # strict, with noUncheckedIndexedAccess and exactOptionalPropertyTypes
 pnpm lint        # Biome
 pnpm boundaries  # architecture rules
@@ -212,7 +212,8 @@ pnpm boundaries  # architecture rules
 | Target | Coverage |
 |---|---|
 | `packages/domain` | Both age boundaries at exactly 23 and 50, the salary threshold at exactly ₹25,000, PAN variants, the float traps in paise conversion, both interest anchors, every legal and illegal transition, and the loan visibility clauses |
-| `apps/api` | The 401/403 split, forged and expired tokens, the duplicate-key mapping, the validation envelope, and magic-byte upload rejection |
+| `apps/api` | The 401/403 split, forged and expired tokens, the duplicate-key mapping, the validation envelope, magic-byte upload rejection, and a malformed id answering 404 rather than casting |
+| `apps/api` workflows | The two places money moves: that a transition writes conditional on the status it observed, that a duplicate UTR is refused before the balance is touched, and that the loan closes at exactly zero. Each suite was run against deliberately broken code to confirm it fails |
 | `apps/web` | None — deliberately. The recording is the end-to-end proof |
 
 Behaviour that needs a live database — the concurrent-transition guard, duplicate UTR, overpayment rollback, auto-close — was verified against Atlas and is scripted in [`docs/demo-script.md`](docs/demo-script.md).

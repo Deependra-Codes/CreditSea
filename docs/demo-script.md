@@ -118,7 +118,7 @@ Switch to the borrower window and refresh the status page.
 
 - Sales shows the pre-application funnel, and keeps converted leads on the list rather than dropping them
 - `pnpm boundaries` fails the build if a business rule is written outside `packages/domain`
-- 82 tests, weighted at the BRE boundaries and the loan math anchors
+- 96 tests, weighted at the BRE boundaries, the loan math anchors, and the two services that move money
 - The theme switch is in every shell, and the new theme is wiped in as a circle from the control itself
 
 ## Before recording
