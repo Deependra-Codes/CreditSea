@@ -96,6 +96,13 @@ export function EligibilityForm({
     ]),
   ) as Record<BreCode, RuleState>;
 
+  // With all four ticked there is nothing left to check — the browser has run
+  // the same rules the server will. Calling it a check then would be a lie: the
+  // button is saving the details and moving on, so it says so.
+  const ready = verdict?.passed === true;
+  const label = ready ? "Continue to salary slip" : "Check eligibility";
+  const busyLabel = ready ? "Saving…" : "Checking…";
+
   const age =
     draft.dateOfBirth && !Number.isNaN(new Date(draft.dateOfBirth).getTime())
       ? calculateAge(new Date(draft.dateOfBirth), new Date())
@@ -241,7 +248,7 @@ export function EligibilityForm({
       )}
 
       <Button type="submit" disabled={pending} className="self-start">
-        {pending ? "Checking…" : "Check eligibility"}
+        {pending ? busyLabel : label}
       </Button>
     </form>
   );
