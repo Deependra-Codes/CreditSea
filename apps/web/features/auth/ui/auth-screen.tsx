@@ -112,12 +112,14 @@ export function AuthScreen({ initialMode }: { initialMode: AuthMode }) {
       {/* ── the form half ── */}
       <main
         className={[
-          "flex items-center justify-center px-5 py-12",
+          // Opaque on purpose: a transparent half lets the mesh panel show
+          // through it as the two slide past each other.
+          "flex items-center justify-center bg-surface px-5 py-12",
           "relative transition-transform duration-[820ms] ease-(--ease-swap) will-change-transform",
           registering ? "lg:-translate-x-full" : "lg:translate-x-0",
         ].join(" ")}
       >
-        {/* keyed on mode, so the contents cross-fade while the halves slide */}
+        {/* the copy fades out and back while the halves slide past each other */}
         <div
           className={[
             "flex w-full max-w-sm flex-col gap-6",
@@ -140,7 +142,7 @@ export function AuthScreen({ initialMode }: { initialMode: AuthMode }) {
             <button
               type="button"
               onClick={() => switchTo(registering ? "signin" : "register")}
-              className="font-bold text-accent underline-offset-4 hover:underline"
+              className="rounded-ctrl font-bold text-accent underline-offset-4 hover:underline"
             >
               {copy.switchLabel}
             </button>
