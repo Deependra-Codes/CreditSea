@@ -1,6 +1,6 @@
 import { type CreateLoanInput, ok } from "@lms/contracts";
 import type { Request, Response } from "express";
-import { pathParam, requireUser } from "../../lib/request";
+import { objectIdParam, requireUser } from "../../lib/request";
 import { toLoanResponse } from "../../models/loan";
 import { toPaymentResponse } from "../../models/payment";
 
@@ -18,6 +18,6 @@ export async function myLoans(req: Request, res: Response) {
 }
 
 export async function loanDetail(req: Request, res: Response) {
-  const { loan, payments } = await getLoanForViewer(requireUser(req), pathParam(req, "id"));
+  const { loan, payments } = await getLoanForViewer(requireUser(req), objectIdParam(req, "id"));
   res.json(ok({ loan: toLoanResponse(loan), payments: payments.map(toPaymentResponse) }));
 }

@@ -1,6 +1,6 @@
 import { type PaymentInput, ok } from "@lms/contracts";
 import type { Request, Response } from "express";
-import { pathParam, requireUser } from "../../lib/request";
+import { objectIdParam, requireUser } from "../../lib/request";
 import { validated } from "../../middleware/validate";
 import { toLoanResponse } from "../../models/loan";
 import { toPaymentResponse } from "../../models/payment";
@@ -12,13 +12,13 @@ export async function readQueue(_req: Request, res: Response) {
 }
 
 export async function readPayments(req: Request, res: Response) {
-  const payments = await paymentsFor(pathParam(req, "id"));
+  const payments = await paymentsFor(objectIdParam(req, "id"));
   res.json(ok({ payments: payments.map(toPaymentResponse) }));
 }
 
 export async function addPayment(req: Request, res: Response) {
   const { payment, loan } = await recordPayment(
-    pathParam(req, "id"),
+    objectIdParam(req, "id"),
     validated<PaymentInput>(req),
     requireUser(req),
   );

@@ -1,6 +1,6 @@
 import { type SanctionInput, ok } from "@lms/contracts";
 import type { Request, Response } from "express";
-import { pathParam, requireUser } from "../../lib/request";
+import { objectIdParam, requireUser } from "../../lib/request";
 import { validated } from "../../middleware/validate";
 import { toLoanResponse } from "../../models/loan";
 import { decideSanction, sanctionQueue } from "./service";
@@ -12,7 +12,7 @@ export async function readQueue(_req: Request, res: Response) {
 
 export async function decide(req: Request, res: Response) {
   const loan = await decideSanction(
-    pathParam(req, "id"),
+    objectIdParam(req, "id"),
     validated<SanctionInput>(req),
     requireUser(req),
   );

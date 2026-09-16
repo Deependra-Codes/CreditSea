@@ -1,7 +1,7 @@
 import type { Role } from "@lms/domain";
 import type { Request, Response } from "express";
 import { HttpError } from "../../lib/http-error";
-import { pathParam, requireUser } from "../../lib/request";
+import { objectIdParam, requireUser } from "../../lib/request";
 import { readSalarySlip } from "./service";
 
 const REVIEWER_ROLES: readonly Role[] = ["ADMIN", "SANCTION", "DISBURSEMENT", "COLLECTION"];
@@ -12,7 +12,7 @@ const REVIEWER_ROLES: readonly Role[] = ["ADMIN", "SANCTION", "DISBURSEMENT", "C
  */
 export async function downloadSalarySlip(req: Request, res: Response) {
   const viewer = requireUser(req);
-  const ownerId = pathParam(req, "userId");
+  const ownerId = objectIdParam(req, "userId");
 
   if (viewer.id !== ownerId && !REVIEWER_ROLES.includes(viewer.role)) {
     throw HttpError.forbidden();
