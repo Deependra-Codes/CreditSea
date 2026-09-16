@@ -2,8 +2,7 @@ import { QueueSkeleton } from "@/components/queue-skeleton";
 
 export default function Loading() {
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <QueueSkeleton />
-    </div>
+    // The layout supplies the page frame; repeating it here would double the padding.
+    <QueueSkeleton />
   );
 }
