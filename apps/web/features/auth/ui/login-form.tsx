@@ -53,6 +53,7 @@ export function LoginForm() {
       </Button>
 
       <DemoAccounts
+        selectedEmail={email}
         onPick={(demoEmail, demoPassword) => {
           setEmail(demoEmail);
           setPassword(demoPassword);
