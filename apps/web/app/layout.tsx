@@ -22,8 +22,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <ThemeScript />
         {children}
+        {/* Under the header, where the work is. At bottom-right it landed in the
+            empty corner of a wide screen and confirmations went unseen. */}
         <Toaster
-          position="bottom-right"
+          position="top-center"
+          offset="88px"
           toastOptions={{
             style: {
               background: "var(--color-canvas)",

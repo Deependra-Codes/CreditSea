@@ -38,6 +38,9 @@ export function SlipUpload({ onUploaded }: { onUploaded: (slip: SalarySlipRespon
       // The client's accept and size check are conveniences; the server checks
       // magic bytes, so its rejection is shown verbatim rather than softened.
       setError(caught instanceof ApiClientError ? caught.message : "Could not reach the server.");
+    } finally {
+      // Not left to the step change to unmount this: if it ever does not
+      // advance, the button would sit on "Uploading…" for good.
       setPending(false);
     }
   }
