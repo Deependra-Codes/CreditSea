@@ -42,7 +42,11 @@ Change date of birth to `01/01/1995`, salary to `64000`, employment to `Salaried
 
 > "The client runs the same rule module the server treats as authority. It is the same file — not a copy — so the two cannot drift."
 
-Click **Check eligibility**. It passes and the step advances.
+Note the button as the last row turns green:
+
+> "It stops saying *Check eligibility* once there is nothing left to check — the browser has already run the rules the server will. Now it just saves and moves on."
+
+Click **Continue to salary slip**. The step advances.
 
 ## 1:40 — Upload, and a rejection (35s)
 
@@ -88,7 +92,7 @@ Sign in as `collection@lms.test`. Open the row. The outstanding balance is pre-f
 
 First a partial payment: UTR `UTR1001`, amount `10000`.
 
-> "Balance drops. Loan stays open."
+> "Balance drops, the loan stays open, and the form comes back empty against the new balance — the spent UTR is not left sitting in the box."
 
 Now try the same UTR again.
 
@@ -114,7 +118,8 @@ Switch to the borrower window and refresh the status page.
 
 - Sales shows the pre-application funnel, and keeps converted leads on the list rather than dropping them
 - `pnpm boundaries` fails the build if a business rule is written outside `packages/domain`
-- 77 tests, weighted at the BRE boundaries and the loan math anchors
+- 82 tests, weighted at the BRE boundaries and the loan math anchors
+- The theme switch is in every shell, and the new theme is wiped in as a circle from the control itself
 
 ## Before recording
 
@@ -124,3 +129,5 @@ pnpm dev
 ```
 
 Check the API is on `:4000` and the web on `:3000`, and that your Atlas IP allowlist still includes your current address.
+
+`pnpm seed` resets the demo cohort but deliberately leaves real signups alone — so any account created while testing still shows in **Sales**. Drop those from the `users` collection first if you plan to show that screen.
