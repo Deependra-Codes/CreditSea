@@ -3,9 +3,9 @@
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const STEP_MS = 2800;
-/** Long enough that the fill is still travelling when the eye reaches it. */
-const FILL_MS = 900;
+const STEP_MS = 2000;
+/** Still travelling when the eye reaches it, but done well inside a step. */
+const FILL_MS = 650;
 
 const STAGES = [
   { label: "Applied", note: "with the sanction team", dot: "bg-stage-1", outstanding: null },
@@ -31,7 +31,7 @@ function StageText({ index, values }: { index: number; values: readonly string[]
           // Transparent is still spoken, so the stack would read all four stages
           // out at once. Only the live one is exposed.
           aria-hidden={position !== index}
-          className={`col-start-1 row-start-1 transition-opacity duration-500 ease-(--ease-standard) ${
+          className={`col-start-1 row-start-1 transition-opacity duration-[380ms] ease-(--ease-standard) ${
             position === index ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -72,7 +72,7 @@ export function LiveLoanCard() {
 
         <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold text-ink-2 ring-1 ring-line">
           <span
-            className={`size-2 rounded-full transition-colors duration-500 ease-(--ease-standard) ${stage.dot}`}
+            className={`size-2 rounded-full transition-colors duration-[380ms] ease-(--ease-standard) ${stage.dot}`}
           />
           <StageText index={index} values={LABELS} />
         </span>
@@ -82,7 +82,7 @@ export function LiveLoanCard() {
         <span className="text-4xl font-extrabold tracking-[-0.03em] tabular-nums">₹1,20,000</span>
         {/* Always present, so settling fades in rather than shoving the row. */}
         <span
-          className={`flex items-center gap-1 text-xs font-bold text-good transition-opacity duration-500 ease-(--ease-standard) ${
+          className={`flex items-center gap-1 text-xs font-bold text-good transition-opacity duration-[380ms] ease-(--ease-standard) ${
             closed ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -97,7 +97,7 @@ export function LiveLoanCard() {
 
       {/* Outstanding appears when funds go out, and drains as it is repaid. */}
       <div
-        className={`grid transition-all duration-700 ease-(--ease-standard) ${
+        className={`grid transition-all duration-500 ease-(--ease-standard) ${
           stage.outstanding === null
             ? "mt-0 grid-rows-[0fr] opacity-0"
             : "mt-5 grid-rows-[1fr] opacity-100"
@@ -110,7 +110,7 @@ export function LiveLoanCard() {
           </div>
           <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-line">
             <div
-              className="h-full rounded-full bg-interest transition-[width] duration-[1400ms] ease-(--ease-standard)"
+              className="h-full rounded-full bg-interest transition-[width] duration-[1000ms] ease-(--ease-standard)"
               style={{ width: `${(stage.outstanding ?? 0) * 100}%` }}
             />
           </div>
@@ -137,7 +137,7 @@ export function LiveLoanCard() {
             {/* Lights once the fill has nearly arrived, so the rail reads as a
                 journey instead of four things changing at the same instant. */}
             <span
-              className={`size-2.5 rounded-full transition-all delay-[550ms] duration-500 ease-(--ease-standard) ${
+              className={`size-2.5 rounded-full transition-all delay-[380ms] duration-[400ms] ease-(--ease-standard) ${
                 position <= index ? entry.dot : "bg-line"
               } ${position === index ? "ring-4 ring-accent-sub" : ""}`}
             />
