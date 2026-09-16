@@ -243,3 +243,23 @@ input:-webkit-autofill:focus {
 ::view-transition-new(root) {
   z-index: 2;
 }
+
+/* While the wipe runs, the wipe is the only thing allowed to move.
+ *
+ * The transition reveals a LIVE tree, not a picture. Every element carrying its
+ * own colour transition re-tweens the moment the theme attribute flips, so the
+ * circle was opening onto a page that was itself still mid-animation — two
+ * transitions over the same pixels, which is the tearing.
+ *
+ * backdrop-filter goes with them: Chromium repaints it through a software path
+ * when the colours beneath it change, and that flashes worst on the sticky
+ * header. Nothing is lost by dropping the blur for 450ms.
+ */
+html[data-wiping] *,
+html[data-wiping] *::before,
+html[data-wiping] *::after {
+  transition: none !important;
+  animation-play-state: paused !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}

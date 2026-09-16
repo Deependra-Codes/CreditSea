@@ -63,12 +63,19 @@ export function ThemeToggle() {
     const box = event.currentTarget.getBoundingClientRect();
     const x = box.left + box.width / 2;
     const y = box.top + box.height / 2;
+    const root = document.documentElement;
+
+    // Set before the snapshot, cleared when the wipe is done: globals.css uses
+    // it to hold every other transition, animation and blur still, so the
+    // circle opens onto a page that is not also moving underneath it.
+    root.setAttribute("data-wiping", "");
 
     // flushSync so the DOM already carries the new theme when the API snapshots it.
     const transition = document.startViewTransition(() => flushSync(plain));
+    transition.finished.finally(() => root.removeAttribute("data-wiping"));
 
     transition.ready.then(() => {
-      document.documentElement.animate(
+      root.animate(
         {
           clipPath: [
             `circle(0px at ${x}px ${y}px)`,
