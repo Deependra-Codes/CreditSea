@@ -196,6 +196,7 @@ Each of these is a decision, not an oversight.
 - **Uploads go to local disk**, served through an authenticated route — never a static directory, since possession of a URL would otherwise be enough to read a stranger's salary slip. Production would use object storage.
 - **No pagination.** Queues load in full, which is right at demo scale and wrong beyond it.
 - **No rate limiting** on authentication.
+- **An unknown dashboard section answers 200, not 404.** The 404 page renders correctly, but `loading.tsx` opens a Suspense boundary and the response has already begun streaming by the time `notFound()` runs, so the status is fixed. Correcting it means giving up the streamed loading state for every module, which is a poor trade for a URL nobody reaches by accident.
 
 ---
 
